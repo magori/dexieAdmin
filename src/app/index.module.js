@@ -5,7 +5,7 @@ import { DbManagerService} from './service/dbManager.service';
 import { MainController} from './main/main.controller'
 import { DbManagerDirective} from './dbManager/dbManager.directive';
 
-angular.module('DBManger', ['ngAnimate', 'ngRoute', 'ui.bootstrap'])
+angular.module('DBManger', ['ngRoute', 'ui.bootstrap'])
   .config(config)
   .config(routerConfig)
   .controller('MainController', MainController)

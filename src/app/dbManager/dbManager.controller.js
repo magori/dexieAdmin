@@ -13,7 +13,6 @@ export class DbManagerController {
     });
     this.tables = this.dbManager.getDb().tables
     this.displayData(this.tables[0]);
-    this.columns = this.resolveColumns(this.tables[0]);
   }
 
   resolveColumns(table) {
@@ -101,7 +100,7 @@ export class DbManagerController {
     this.selectedTableIndexes = this.resolveColumns(table);
     var dottedIndexes = this.selectedTableIndexes.filter((inedexe) => inedexe.includes("."))
     var indexes = [];
-    dottedIndexes.forEach((indexe, i) => {
+    dottedIndexes.forEach((indexe) => {
       indexes.push({
         key: indexe,
         value: indexe.split('.')

@@ -1,26 +1,22 @@
 {
-  "name": "test",
-  "version": "0.0.0",
+  "name": "dexie-admin",
+  "version": "0.0.1",
+  "description": "A administration interface for dexie, this display the table and the date. You can drop table, load, dump...",
+  "license": "MIT",
+  "moduleType": ["es6"],
   "dependencies": {
-    "angular-animate": "~1.5.3",
-    "angular-cookies": "~1.5.3",
-    "angular-touch": "~1.5.3",
-    "angular-sanitize": "~1.5.3",
-    "angular-messages": "~1.5.3",
-    "angular-aria": "~1.5.3",
-    "angular-route": "~1.5.3",
-    "bootstrap": "~3.3.5",
-    "angular-bootstrap": "~1.3.3",
-    "traceur-runtime": "~0.0.90",
-    "animate.css": "~3.4.0",
-    "angular": "~1.5.3",
+    "angular": "~1.5.9",
+    "angular-route": "~1.5.9",
+    "angular-bootstrap": "~2.0.1",
+    "bootstrap": "~3.3.6",
+    "traceur-runtime": "~0.0.111",
     "dexie": "^1.4.1",
     "chance": "^1.0.3",
     "font-awesome": "fontawesome#^4.6.3",
     "font-awesome-animation": "^0.0.9"
   },
   "devDependencies": {
-    "angular-mocks": "~1.5.3"
+    "angular-mocks": "~1.5.9"
   },
   "overrides": {
     "bootstrap": {
@@ -41,5 +37,22 @@
   },
   "resolutions": {
     "angular": "~1.5.3"
-  }
+  },
+  "ignore": [
+    "node_modules",
+    "bower_components"
+  ],
+  "authors": [
+    { "name": "Dorian Magnin" }
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/magori/dexieAdmin"
+  },
+  "keywords": [
+    "dexie",
+    "console",
+    "admin",
+    "interface"
+  ]
 }
