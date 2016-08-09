@@ -9,7 +9,7 @@ export class DbManagerController {
     this.dbManager = dbManagerService;
     this.dbManager.onRefresh(() => {
       this.tables = this.dbManager.getDb().tables;
-      this.displayData(this.tables[0]);
+      this.displayData(this.selectedTable);
     });
     this.tables = this.dbManager.getDb().tables
     this.displayData(this.tables[0]);

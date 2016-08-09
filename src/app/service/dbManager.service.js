@@ -1,7 +1,5 @@
 /* global Pormise:false*/
-import {
-  DbDump
-} from './dbDump.service.js';
+import {  DbDump } from './dbDump.service.js';
 
 export class DbManagerService {
 
@@ -21,17 +19,17 @@ export class DbManagerService {
     this.dbDump.config({
       db: this.db
     });
-    var actionsLoad=this.resoloveConfigType('load');
+    var actionsLoad=this.resolveConfigType('load');
     this.actionsLoad = actionsLoad;
     this.context = config.context;
     this.onNewDb = config.onNewDb();
   }
 
   columnsToDisplay(tableName){
-    return this.resoloveConfigType('columns')[tableName];
+    return this.resolveConfigType('columns')[tableName];
   }
 
-  resoloveConfigType(type){
+  resolveConfigType(type){
     var config = {};
     Object.keys(this.config.tablesConfig()).forEach((table)=>{
       var tableConfig = this.config.tablesConfig()[table];
@@ -55,7 +53,7 @@ export class DbManagerService {
   }
 
   hasTrash(table){
-    var trashConfig = this.resoloveConfigType('trash');
+    var trashConfig = this.resolveConfigType('trash');
     if(trashConfig[table.name] === false){
       return false;
     }
@@ -72,10 +70,11 @@ export class DbManagerService {
       var promise = (this.context) ? action.call(this.context) : action(),
         self = this;
       if (promise && promise.then) {
-        return promise.then(() => self.countTupleTable(table));
+        return promise.then(() => self.countTupleTable(table)).then(()=>this.onRefresh());
       } else {
         return new Pormise(() => {
           this.countTupleTable(table);
+          this.onRefresh();
         })
       }
     }
@@ -92,7 +91,7 @@ export class DbManagerService {
   }
 
   delete(table) {
-    return table.clear().then(() => this.countTupleTable(table));
+    return table.clear().then(() => this.countTupleTable(table)).then(()=>this.onRefresh());
   }
 
   drop() {
@@ -123,16 +122,12 @@ export class DbManagerService {
     return this.tables.map((table) => {
       this.countTupleTable(table);
     });
+    this.onRefresh();
   }
 
   countTupleTable(table) {
     return table.count().then((nb) => {
         table.nbRow = nb;
-        // if (this.context) {
-        //   this.onRefresh.call(this.context);
-        // } else {
-        //   this.onRefresh();
-        // }
       });
   }
 

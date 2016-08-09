@@ -32,7 +32,7 @@ export class DbManagerConfig {
           time: true,
           isCloseFriend:false
         },
-        trash: false,
+        trash: true,
         load: () => {
           var friends = [];
           for (var i = 0; i < 3; i++) {
