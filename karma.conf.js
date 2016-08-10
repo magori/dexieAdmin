@@ -47,17 +47,17 @@ module.exports = function(config) {
 
     ngHtml2JsPreprocessor: {
       stripPrefix: conf.paths.src + '/',
-      moduleName: 'test'
+      moduleName: 'dexieAdmin'
     },
 
     logLevel: 'WARN',
 
     frameworks: ['phantomjs-shim', 'jasmine'],
 
-    browsers : ['Chrome'],
+    browsers : ['PhantomJS'],
 
     plugins : [
-      'karma-chrome-launcher',
+      'karma-phantomjs-launcher',
       'karma-phantomjs-shim',
       'karma-coverage',
       'karma-jasmine',

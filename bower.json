@@ -9,7 +9,6 @@
     "angular-route": "~1.5.9",
     "angular-bootstrap": "~2.0.1",
     "bootstrap": "~3.3.6",
-    "traceur-runtime": "~0.0.111",
     "dexie": "^1.4.1",
     "chance": "^1.0.3",
     "font-awesome": "fontawesome#^4.6.3",
