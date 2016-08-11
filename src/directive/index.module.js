@@ -1,6 +1,7 @@
-import { DbManagerConfig } from './dbManager.config';
 import { DbManagerService} from './service/dbManager.service';
+import { DbManagerDirective} from './dbManager/dbManager.directive';
+
 
 angular.module('dexieAdmin', ['ui.bootstrap'])
   .service('dbManagerService', DbManagerService)
-  .service('dbManagerConfig', DbManagerConfig)
+  .directive('dbManager',DbManagerDirective )

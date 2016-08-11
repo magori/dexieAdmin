@@ -1,6 +1,8 @@
 export class DbDump {
 
     constructor () {
+        'ngInject';
+
         this.rn = "\r\n";
     }
 

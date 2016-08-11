@@ -13,7 +13,7 @@ export class DbManagerController {
     });
     this.tables = this.dbManager.getDb().tables
     this.displayData(this.tables[0]);
-  }
+  } 
 
   resolveColumns(table) {
     var columns = this.dbManager.columnsToDisplay(table.name);

@@ -17,7 +17,8 @@ function webpackWrapper(watch, test, callback) {
       preLoaders: [{ test: /\.js$/, exclude: /node_modules/, loader: 'eslint-loader'}],
       loaders: [{ test: /\.js$/, exclude: /node_modules/, loaders: ['ng-annotate', 'babel-loader?presets[]=es2015']}]
     },
-    output: { filename: 'index.module.js' }
+    output: { filename: 'index.module.js' },
+    debug: true
   };
 
   if(watch) {
@@ -45,7 +46,7 @@ function webpackWrapper(watch, test, callback) {
   if (test) {
     sources.push(path.join(conf.paths.src, '/app/**/*.spec.js'));
   }
-
+console.log(sources);
   return gulp.src(sources)
     .pipe(webpack(webpackOptions, null, webpackChangeHandler))
     .pipe(gulp.dest(path.join(conf.paths.tmp, '/serve/app')));

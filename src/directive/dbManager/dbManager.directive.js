@@ -4,7 +4,7 @@ export function DbManagerDirective() {
 
   let directive = {
     restrict: 'E',
-    templateUrl: 'app/dbManager/dbManager.html',
+    templateUrl: './dbManager.html',
     controller: DbManagerController ,
     controllerAs: 'dbManger',
     bindToController: true
