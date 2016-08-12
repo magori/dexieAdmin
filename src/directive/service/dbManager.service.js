@@ -1,5 +1,5 @@
 /* global Pormise:false*/
-import {  DbDump } from './dbDump.service.js';
+import {DbDump} from './dbDump.service.js';
 
 export class DbManagerService {
 
@@ -12,35 +12,84 @@ export class DbManagerService {
   }
 
   config(config) {
-      this.config = config;
+    this.config = config;
     this.db = config.getDb();
     this.tables = this.db.tables;
     this.dbDump = new DbDump();
     this.dbDump.config({
       db: this.db
     });
-    var actionsLoad=this.resolveConfigType('load');
+    var actionsLoad = this.resolveConfigType('load');
     this.actionsLoad = actionsLoad;
     this.context = config.context;
     this.onNewDb = config.onNewDb();
   }
 
-  columnsToDisplay(tableName){
+  columnsToDisplay(tableName) {
     return this.resolveConfigType('columns')[tableName];
   }
 
-  resolveConfigType(type){
+  resolveColumns(table) {
+    var columns = this.columnsToDisplay(table.name);
+    if (!columns) {
+      columns = {}
+    }
+    table.schema.indexes.forEach((indexe) => {
+      if (columns[indexe.name] === undefined) {
+        columns[indexe.name] = true;
+      }
+    })
+    var columnsToDisplay = [];
+    columnsToDisplay = Object.keys(columns).filter((key) => {
+      let conf = columns[key];
+      if (conf === false) {
+        return false;
+      }
+      return true;
+    });
+    return columnsToDisplay;
+  }
+
+  buildData(table) {
+    var selectedTableIndexes = this.resolveColumns(table);
+    var dottedIndexes = selectedTableIndexes.filter((inedexe) => inedexe.includes("."))
+    var indexes = [];
+    dottedIndexes.forEach((indexe) => {
+      indexes.push({
+        key: indexe,
+        value: indexe.split('.')
+      })
+    });
+    return table.toArray().then((list) => {
+        list.map(data => {
+          indexes.forEach((indexe) => {
+            var {
+              key,
+              value
+            } = indexe;
+            data[key] = value.reduce((obj, key) => (obj[key]) ? (obj[key]) : '', data);
+          })
+          return data;
+        })
+        return list;
+      })
+      .then((list) => {
+        return list;
+      });
+  }
+
+  resolveConfigType(type) {
     var config = {};
-    Object.keys(this.config.tablesConfig()).forEach((table)=>{
+    Object.keys(this.config.tablesConfig()).forEach((table) => {
       var tableConfig = this.config.tablesConfig()[table];
-      if(tableConfig && tableConfig[type] != undefined){
+      if (tableConfig && tableConfig[type] != undefined) {
         config[table] = tableConfig[type];
       }
     });
     return config;
   }
 
-  onRefresh(call){
+  onRefresh(call) {
     this.onRefresh = call;
   }
 
@@ -52,9 +101,9 @@ export class DbManagerService {
     return this.resolveActionLoad(table);
   }
 
-  hasTrash(table){
+  hasTrash(table) {
     var trashConfig = this.resolveConfigType('trash');
-    if(trashConfig[table.name] === false){
+    if (trashConfig[table.name] === false) {
       return false;
     }
     return true;
@@ -70,7 +119,7 @@ export class DbManagerService {
       var promise = (this.context) ? action.call(this.context) : action(),
         self = this;
       if (promise && promise.then) {
-        return promise.then(() => self.countTupleTable(table)).then(()=>this.onRefresh());
+        return promise.then(() => self.countTupleTable(table)).then(() => this.onRefresh());
       } else {
         return new Pormise(() => {
           this.countTupleTable(table);
@@ -87,11 +136,11 @@ export class DbManagerService {
   }
 
   deleteAllTable() {
-    return Promise.all(this.tables.map(table => (this.hasTrash(table))?this.delete(table):false));
+    return Promise.all(this.tables.map(table => (this.hasTrash(table)) ? this.delete(table) : false));
   }
 
   delete(table) {
-    return table.clear().then(() => this.countTupleTable(table)).then(()=>this.onRefresh());
+    return table.clear().then(() => this.countTupleTable(table)).then(() => this.onRefresh());
   }
 
   drop() {
@@ -122,13 +171,12 @@ export class DbManagerService {
     return this.tables.map((table) => {
       this.countTupleTable(table);
     });
-    this.onRefresh();
   }
 
   countTupleTable(table) {
     return table.count().then((nb) => {
-        table.nbRow = nb;
-      });
+      table.nbRow = nb;
+    });
   }
 
   search(textSearch, table) {
@@ -137,11 +185,23 @@ export class DbManagerService {
       let t = search.substr(1).split("=");
       if (t.length > 1) {
         let key = t[0].trim().toLowerCase();
-        return table.filter((v) => v[key].toUpperCase().includes(t[1])).toArray();
+        return this.buildData(table).then((list) => {
+          if(list[0][key]){
+          list =  list.filter(v => {
+              var value = v[key];
+              if(!isNaN(parseFloat(value)) && isFinite(value)){
+                return value == t[1]*1;
+              } else {
+                return value.toUpperCase().includes(t[1]);
+              }
+            })
+          }
+          return list;
+        });
       }
       return new Promise(() => {});
     } else {
-      return table.toArray().then((list) => {
+      return this.buildData(table).then((list) => {
         list = list.map(v => {
           v.valstring = this.valuesToString(v);
           return v

@@ -13,27 +13,6 @@ export class DbManagerController {
     });
     this.tables = this.dbManager.getDb().tables
     this.displayData(this.tables[0]);
-  } 
-
-  resolveColumns(table) {
-    var columns = this.dbManager.columnsToDisplay(table.name);
-    if(!columns){
-      columns = {}
-    }
-    table.schema.indexes.forEach((indexe) => {
-      if(columns[indexe.name] === undefined){
-        columns[indexe.name] = true;
-      }
-    })
-    var columnsToDisplay = [];
-    columnsToDisplay = Object.keys(columns).filter((key)=>{
-      let conf = columns[key];
-      if(conf === false) {
-        return false;
-      }
-      return true;
-    });
-    return columnsToDisplay;
   }
 
   animate($event, classCss, promise) {
@@ -97,29 +76,8 @@ export class DbManagerController {
 
   displayData(table) {
     this.selectedTable = table;
-    this.selectedTableIndexes = this.resolveColumns(table);
-    var dottedIndexes = this.selectedTableIndexes.filter((inedexe) => inedexe.includes("."))
-    var indexes = [];
-    dottedIndexes.forEach((indexe) => {
-      indexes.push({
-        key: indexe,
-        value: indexe.split('.')
-      })
-    });
-    table.toArray().then((list) => {
-        list.map(data => {
-          indexes.forEach((indexe) => {
-            var {key, value} = indexe;
-            data[key] = value.reduce((obj, key) => (obj[key]) ? (obj[key]) : '', data);
-          })
-          return data;
-        })
-        return list;
-      })
-      .then((list) => {
-        this.dataTable = list
-      })
-      .then(() => this.$scope.$digest());
+    this.selectedTableIndexes = this.dbManager.resolveColumns(table);
+    this.dbManager.buildData(table).then((list) => this.dataTable = list).then(()=>this.$scope.$digest());
   }
 
   displayRow(data) {
@@ -129,7 +87,7 @@ export class DbManagerController {
         $scope.json = json
       }],
       templateUrl: 'displayJson.html',
-      controllerAs: 'json',
+      controllerAs: 'jsonCtrl',
       size: 'lg',
       resolve: {
         json: () => JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")

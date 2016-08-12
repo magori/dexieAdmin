@@ -10,7 +10,16 @@ function isOnlyChange(event) {
   return event.type === 'changed';
 }
 
-gulp.task('watch', ['scripts:watch', 'inject'], function () {
+var _event;
+gulp.task('buildDireciveAndCopy', ['build'], function() {
+    console.log("build directive");
+     gulp.src('dist/dexieAdmin.js').pipe(gulp.dest('.tmp/serve'));
+     if(_event){
+       browserSync.reload(_event.path);
+     }
+});
+
+gulp.task('watch', ['scripts:watch', 'inject','buildDireciveAndCopy'], function () {
 
   gulp.watch([path.join(conf.paths.src, '/*.html'), 'bower.json'], ['inject-reload']);
 
@@ -22,8 +31,11 @@ gulp.task('watch', ['scripts:watch', 'inject'], function () {
     }
   });
 
-
   gulp.watch(path.join(conf.paths.src, '/app/**/*.html'), function(event) {
     browserSync.reload(event.path);
+  });
+
+  gulp.watch(path.join(conf.paths.src, '/directive/**/*.*'),['buildDireciveAndCopy']).on('change',function (event){
+    _event = event;
   });
 });

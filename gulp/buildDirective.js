@@ -33,16 +33,18 @@ gulp.task('es6-commonjs',['clean-dist'], function(){
 });
 
 gulp.task('commonjs-bundle',['es6-commonjs'], function(){
-  return browserify(['dist/es6/index.module.js']).bundle()
-    .pipe(source('dexieAdminAmd.min.js'))
-    .pipe(buffer())
-    //.pipe($.uglify())
-    //.pipe($.rename('dexieAdminAmd.min.js'))
+  var bundle = browserify(['dist/es6/index.module.js']).bundle();
+    bundle.pipe(source('dexieAdmin.js'))
     .pipe(gulp.dest("dist"));
+
+  return bundle.pipe(source('dexieAdmin.min.js'))
+        .pipe(buffer())
+        .pipe($.sourcemaps.init())
+        .pipe($.uglify())
+        .pipe($.sourcemaps.write("."))
+        .pipe(gulp.dest("dist"));
 });
 
-gulp.task('buildD', ['commonjs-bundle'], function() {
-    gulp.src('src/directive/**/*.html').pipe(gulp.dest('dist'));
+gulp.task('build', ['commonjs-bundle']);
 
-    gulp.src('dist/dexieAdminAmd.min.js').pipe(gulp.dest('.tmp/serve'));
-});
+gulp.task('build:min', ['buil']);
