@@ -43,8 +43,6 @@ var DbManagerController = exports.DbManagerController = function () {
       }
       element.addClass(classCss + " animated");
       promise.then(function () {
-        return _this2.$scope.$digest();
-      }).then(function () {
         return _this2.$timeout(function () {
           return element.removeClass(classCss + " animated");
         });

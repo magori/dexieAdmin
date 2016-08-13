@@ -1,7 +1,6 @@
 {
   "name": "dexie-admin",
-  "version": "0.0.1",
-  "description": "A administration interface for dexie, this display the table and the date. You can drop table, load, dump...",
+  "description": "A administration interface for dexie, this display the table and the data. You can drop table, load, dump...",
   "license": "MIT",
 
   "dependencies": {
@@ -14,6 +13,7 @@
     "font-awesome": "fontawesome#^4.6.3",
     "font-awesome-animation": "^0.0.9"
   },
+
   "devDependencies": {
     "angular-mocks": "~1.5.9"
   },
@@ -21,7 +21,7 @@
   "main": [
     "dist/dexieAdmin.js"
   ],
-  
+
   "overrides": {
     "bootstrap": {
       "main": [

@@ -23,8 +23,7 @@ export class DbManagerController {
       element = i;
     }
     element.addClass(classCss + " animated");
-    promise.then(()=>this.$scope.$digest())
-    .then(() => this.$timeout(() => element.removeClass(classCss + " animated")));
+    promise.then(() => this.$timeout(() => element.removeClass(classCss + " animated")));
   }
 
   loadAll($event) {
