@@ -21,6 +21,7 @@
   "main": [
     "dist/dexieAdmin.js"
   ],
+  
   "overrides": {
     "bootstrap": {
       "main": [
