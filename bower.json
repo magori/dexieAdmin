@@ -1,6 +1,6 @@
 {
-  "name": "dexie-admin",
-  "description": "A administration interface for dexie, this display the table and the data. You can drop table, load, dump...",
+  "name": "ng-dexie-admin",
+  "description": "A administration interface for dexie, this display the table and the data. You can drop table, load, delte, dump and search in data",
   "license": "MIT",
 
   "dependencies": {
