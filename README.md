@@ -1,2 +1,2 @@
 # dexieAdmin
-A administration interface for dexie using Angular
+A administration interface for dexie using a the directive
