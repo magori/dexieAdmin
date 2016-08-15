@@ -51,7 +51,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git://github.com/magori/dexieAdmin"
+    "url": "git://github.com/magori/ngDexieAdmin"
   },
   "keywords": [
     "dexie",
