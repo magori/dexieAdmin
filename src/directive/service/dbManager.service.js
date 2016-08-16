@@ -93,7 +93,6 @@ export class DbManagerService {
     this.onRefresh = call;
   }
 
-
   hasActionLoad(table) {
     return this.resolveActionLoad(table);
   }
@@ -143,6 +142,7 @@ export class DbManagerService {
     db.version(1).stores(this.dbDump.tableDef)
     return db;
   }
+
   drop() {
     return this.db.delete()
       .then(() => this.createDb().open())
