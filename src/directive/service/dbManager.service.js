@@ -93,24 +93,33 @@ export class DbManagerService {
     this.onRefresh = call;
   }
 
-  loadAll() {
-    return Promise.all(this.tables.map((table) => this.load(table)));
-  }
 
   hasActionLoad(table) {
     return this.resolveActionLoad(table);
   }
 
-  hasTrash(table) {
-    var trashConfig = this.resolveConfigType('trash');
-    if (trashConfig[table.name] === false) {
-      return false;
+  hasDelete(table) {
+    var trashConfig = this.resolveConfigType('noDelete');
+    if (trashConfig[table.name] === false || trashConfig[table.name] === undefined) {
+      return true;
     }
-    return true;
+    return false;
   }
 
   resolveActionLoad(table) {
     return this.actionsLoad[table.name];
+  }
+
+  deleteAllTable() {
+    return Promise.all(this.tables.map(table => (this.hasDelete(table)) ? this.delete(table) : false));
+  }
+
+  delete(table) {
+    return table.clear().then(() => this.countTupleTable(table)).then(() => this.onRefresh());
+  }
+
+  loadAll() {
+    return Promise.all(this.tables.map((table) => this.load(table)));
   }
 
   load(table) {
@@ -134,15 +143,6 @@ export class DbManagerService {
     db.version(1).stores(this.dbDump.tableDef)
     return db;
   }
-
-  deleteAllTable() {
-    return Promise.all(this.tables.map(table => (this.hasTrash(table)) ? this.delete(table) : false));
-  }
-
-  delete(table) {
-    return table.clear().then(() => this.countTupleTable(table)).then(() => this.onRefresh());
-  }
-
   drop() {
     return this.db.delete()
       .then(() => this.createDb().open())

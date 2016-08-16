@@ -119,27 +119,18 @@ var DbManagerService = function () {
       this.onRefresh = call;
     }
   }, {
-    key: 'loadAll',
-    value: function loadAll() {
-      var _this2 = this;
-
-      return Promise.all(this.tables.map(function (table) {
-        return _this2.load(table);
-      }));
-    }
-  }, {
     key: 'hasActionLoad',
     value: function hasActionLoad(table) {
       return this.resolveActionLoad(table);
     }
   }, {
-    key: 'hasTrash',
-    value: function hasTrash(table) {
-      var trashConfig = this.resolveConfigType('trash');
-      if (trashConfig[table.name] === false) {
-        return false;
+    key: 'hasDelete',
+    value: function hasDelete(table) {
+      var trashConfig = this.resolveConfigType('noDelete');
+      if (trashConfig[table.name] === false || trashConfig[table.name] === undefined) {
+        return true;
       }
-      return true;
+      return false;
     }
   }, {
     key: 'resolveActionLoad',
@@ -147,9 +138,38 @@ var DbManagerService = function () {
       return this.actionsLoad[table.name];
     }
   }, {
+    key: 'deleteAllTable',
+    value: function deleteAllTable() {
+      var _this2 = this;
+
+      return Promise.all(this.tables.map(function (table) {
+        return _this2.hasDelete(table) ? _this2.delete(table) : false;
+      }));
+    }
+  }, {
+    key: 'delete',
+    value: function _delete(table) {
+      var _this3 = this;
+
+      return table.clear().then(function () {
+        return _this3.countTupleTable(table);
+      }).then(function () {
+        return _this3.onRefresh();
+      });
+    }
+  }, {
+    key: 'loadAll',
+    value: function loadAll() {
+      var _this4 = this;
+
+      return Promise.all(this.tables.map(function (table) {
+        return _this4.load(table);
+      }));
+    }
+  }, {
     key: 'load',
     value: function load(table) {
-      var _this3 = this;
+      var _this5 = this;
 
       var action = this.resolveActionLoad(table);
       if (action) {
@@ -159,12 +179,12 @@ var DbManagerService = function () {
           return promise.then(function () {
             return self.countTupleTable(table);
           }).then(function () {
-            return _this3.onRefresh();
+            return _this5.onRefresh();
           });
         } else {
           return new Pormise(function () {
-            _this3.countTupleTable(table);
-            _this3.onRefresh();
+            _this5.countTupleTable(table);
+            _this5.onRefresh();
           });
         }
       }
@@ -175,26 +195,6 @@ var DbManagerService = function () {
       var db = new Dexie(this.dbDump.dbName);
       db.version(1).stores(this.dbDump.tableDef);
       return db;
-    }
-  }, {
-    key: 'deleteAllTable',
-    value: function deleteAllTable() {
-      var _this4 = this;
-
-      return Promise.all(this.tables.map(function (table) {
-        return _this4.hasTrash(table) ? _this4.delete(table) : false;
-      }));
-    }
-  }, {
-    key: 'delete',
-    value: function _delete(table) {
-      var _this5 = this;
-
-      return table.clear().then(function () {
-        return _this5.countTupleTable(table);
-      }).then(function () {
-        return _this5.onRefresh();
-      });
     }
   }, {
     key: 'drop',

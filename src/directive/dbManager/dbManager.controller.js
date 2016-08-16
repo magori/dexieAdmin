@@ -38,8 +38,8 @@ export class DbManagerController {
     return this.dbManager.hasActionLoad(table);
   }
 
-  hasTrash(table) {
-    return this.dbManager.hasTrash(table);
+  hasDelete(table) {
+    return this.dbManager.hasDelete(table);
   }
 
   createDb() {
@@ -51,6 +51,10 @@ export class DbManagerController {
   }
 
   delete($event, table) {
+    this.animate($event, 'faa-flash', this.dbManager.delete(table));
+  }
+
+  forceDelete($event, table) {
     this.animate($event, 'faa-flash', this.dbManager.delete(table));
   }
 

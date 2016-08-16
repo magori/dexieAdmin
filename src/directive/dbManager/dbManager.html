@@ -3,7 +3,7 @@
 </style>
 <script type="text/ng-template" id="displayJson.html">
   <pre>
-    {{json}} 
+    {{json}}
   </pre>
 </script>
   <div class="row">
@@ -41,7 +41,10 @@
                   <div ng-click="dbManger.save($event, table)" class="btn  btn-default" title="Dump table">
                     <i class="fa fa-floppy-o" fa-stack-1x aria-hidden="true"></i>
                   </div>
-                  <div ng-if="dbManger.hasTrash(table)" ng-click="dbManger.delete($event, table)" class="btn  btn-default" title="Clear table">
+                  <div ng-if="dbManger.hasDelete(table)" ng-click="dbManger.delete($event, table)" class="btn  btn-default" title="Clear table">
+                    <i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i>
+                  </div>
+                  <div ng-if="!dbManger.hasDelete(table)" ng-click="dbManger.forceDelete($event, table)" class="btn btn-danger" title="Force clear table">
                     <i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i>
                   </div>
                 </div>

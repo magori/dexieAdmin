@@ -64,9 +64,9 @@ var DbManagerController = exports.DbManagerController = function () {
       return this.dbManager.hasActionLoad(table);
     }
   }, {
-    key: "hasTrash",
-    value: function hasTrash(table) {
-      return this.dbManager.hasTrash(table);
+    key: "hasDelete",
+    value: function hasDelete(table) {
+      return this.dbManager.hasDelete(table);
     }
   }, {
     key: "createDb",
@@ -81,6 +81,11 @@ var DbManagerController = exports.DbManagerController = function () {
   }, {
     key: "delete",
     value: function _delete($event, table) {
+      this.animate($event, 'faa-flash', this.dbManager.delete(table));
+    }
+  }, {
+    key: "forceDelete",
+    value: function forceDelete($event, table) {
       this.animate($event, 'faa-flash', this.dbManager.delete(table));
     }
   }, {

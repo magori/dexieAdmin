@@ -32,7 +32,7 @@ export class DbManagerConfig {
           time: true,
           isCloseFriend:false
         },
-        trash: true,
+        noDelete: true,
         load: () => {
           var friends = [];
           for (var i = 0; i < 3; i++) {
@@ -41,12 +41,6 @@ export class DbManagerConfig {
               age: chance.age(),
               contact: {
                 phone: chance.phone()
-              },
-              t: {
-                g: {
-                  t: "toto",
-                  v: "val"
-                }
               }
             });
           }
