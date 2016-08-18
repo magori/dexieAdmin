@@ -11,6 +11,9 @@
         <div class="panel panel-default">
           <div class="panel-heading clearfix">
             <div class="btn-toolbar" role="toolbar">
+              <div class="pull-left panel-title">
+                <span class="badge">{{ dbManger.tables.length}}</span>
+              </div>
               <div class="btn-group pull-right">
                 <div ng-click="dbManger.dump($event)" class="btn btn-default" title="Dump">
                   <i class="fa fa-floppy-o" aria-hidden="true"></i>

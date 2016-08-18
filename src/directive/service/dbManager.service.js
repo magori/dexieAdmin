@@ -14,7 +14,7 @@ export class DbManagerService {
   config(config) {
     this.config = config;
     this.db = config.getDb();
-    this.tables = this.db.tables;
+    this.tables = this.orderTables(this.db.tables);
     this.dbDump = new DbDump();
     this.dbDump.config({
       db: this.db
@@ -25,6 +25,25 @@ export class DbManagerService {
     this.onNewDb = config.onNewDb();
   }
 
+  getTables(){
+    return this.tables;
+  }
+
+  orderTables(tables) {
+    var confOrder = this.resolveConfigType('order');
+    var tableOrder = [];
+    for(let key in confOrder){
+      tableOrder.push({name: key, order: confOrder[key]});
+    }
+    tableOrder.sort((a,b)=>b.order-a.order);
+    tableOrder.map((order)=>{
+      var index = tables.findIndex((t)=>t.name == order.name);
+      var table = tables.splice(index,1)[0];
+      tables.unshift(table);
+    });
+    return tables;
+  }
+
   columnsToDisplay(tableName) {
     return this.resolveConfigType('columns')[tableName];
   }
@@ -32,7 +51,7 @@ export class DbManagerService {
   resolveColumns(table) {
     var columns = this.columnsToDisplay(table.name);
     if (!columns) {
-      columns = {}
+      columns = {};
     }
     table.schema.indexes.forEach((indexe) => {
       if (columns[indexe.name] === undefined) {
@@ -240,9 +259,5 @@ export class DbManagerService {
       }
     }
     return values.toUpperCase();
-  }
-
-  getDb() {
-    return this.db;
   }
 }

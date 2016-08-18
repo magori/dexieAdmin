@@ -8,10 +8,10 @@ export class DbManagerController {
     this.$uibModal = $uibModal
     this.dbManager = dbManagerService;
     this.dbManager.onRefresh(() => {
-      this.tables = this.dbManager.getDb().tables;
+      this.tables = this.dbManager.getTables();
       this.displayData(this.selectedTable);
     });
-    this.tables = this.dbManager.getDb().tables
+    this.tables = this.dbManager.getTables()
     this.displayData(this.tables[0]);
   }
 

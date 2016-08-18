@@ -23,10 +23,10 @@ var DbManagerController = exports.DbManagerController = function () {
     this.$uibModal = $uibModal;
     this.dbManager = dbManagerService;
     this.dbManager.onRefresh(function () {
-      _this.tables = _this.dbManager.getDb().tables;
+      _this.tables = _this.dbManager.getTables();
       _this.displayData(_this.selectedTable);
     });
-    this.tables = this.dbManager.getDb().tables;
+    this.tables = this.dbManager.getTables();
     this.displayData(this.tables[0]);
   }
 

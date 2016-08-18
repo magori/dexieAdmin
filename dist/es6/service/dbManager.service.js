@@ -31,7 +31,7 @@ var DbManagerService = function () {
     value: function config(_config) {
       this.config = _config;
       this.db = _config.getDb();
-      this.tables = this.db.tables;
+      this.tables = this.orderTables(this.db.tables);
       this.dbDump = new _dbDumpService.DbDump();
       this.dbDump.config({
         db: this.db
@@ -40,6 +40,31 @@ var DbManagerService = function () {
       this.actionsLoad = actionsLoad;
       this.context = _config.context;
       this.onNewDb = _config.onNewDb();
+    }
+  }, {
+    key: 'getTables',
+    value: function getTables() {
+      return this.tables;
+    }
+  }, {
+    key: 'orderTables',
+    value: function orderTables(tables) {
+      var confOrder = this.resolveConfigType('order');
+      var tableOrder = [];
+      for (var key in confOrder) {
+        tableOrder.push({ name: key, order: confOrder[key] });
+      }
+      tableOrder.sort(function (a, b) {
+        return b.order - a.order;
+      });
+      tableOrder.map(function (order) {
+        var index = tables.findIndex(function (t) {
+          return t.name == order.name;
+        });
+        var table = tables.splice(index, 1)[0];
+        tables.unshift(table);
+      });
+      return tables;
     }
   }, {
     key: 'columnsToDisplay',
@@ -334,11 +359,6 @@ var DbManagerService = function () {
         }
       }
       return values.toUpperCase();
-    }
-  }, {
-    key: 'getDb',
-    value: function getDb() {
-      return this.db;
     }
   }]);
 
