@@ -17,7 +17,20 @@ Install via bower
 #### Initialize
 ```javascript
 // require module in your app:
-var app = angular.module('exampleApp', ['ngDexieAdmin']);
+var app = angular.module('exampleApp', ['ngDexieAdmin'])
+          .service('ngDexieAdminConfig', function () {
+            var db = new Dexie("MyDatabases");
+                 db.version(1).stores({
+                  friends: "++id, name, age, isCloseFriend, contact.phone ",
+                  notes: "++id, title, date, *items",
+                  noLoadAction: "++id"
+                });
+            return {
+              getDb : function () {
+                return db;
+              },
+            }
+          });
 ```    
 
 Then include the directive, bootstrap, ui-bootstrap and fontawsome in your html (you can also use the minified versions)
