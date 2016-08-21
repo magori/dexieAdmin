@@ -24,12 +24,12 @@ var app = angular.module('exampleApp', ['ngDexieAdmin']);
 Then include the directive, bootstrap, ui-bootstrap and fontawsome in your html (you can also use the minified versions)
     
 ```html
-    <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
-    <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
-    <link rel="stylesheet" href="bower_components/font-awesome-animation/dist/font-awesome-animation.css" />
-    ....
-    <script src="bower_components/dexie/dist/dexie.min.js"></script> 
-    <script src="bower_components/ng-dexie-admin/dist/ngDexieAdmin.js"></script>
-    <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
+  <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
+  <link rel="stylesheet" href="bower_components/font-awesome-animation/dist/font-awesome-animation.css" />
+  ....
+  <script src="bower_components/dexie/dist/dexie.min.js"></script> 
+  <script src="bower_components/ng-dexie-admin/dist/ngDexieAdmin.js"></script>
+  <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
 ```
 
