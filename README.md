@@ -13,7 +13,14 @@ Installation
 Install via bower
 
     bower install ng-dexie-admin --save
-    
+
+#### Use as Angular module
+
+```javascript
+// require module in your app:
+var app = angular.module('exampleApp', ['ngDexieAdmin']);
+```    
+
 Then include the directive, bootstrap, ui-bootstrap and fontawsome in your html (you can also use the minified versions)
     
 ```html
