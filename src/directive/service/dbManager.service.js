@@ -192,9 +192,10 @@ export class DbManagerService {
   }
 
   countTupleForEachTable() {
-    return this.tables.map((table) => {
-      this.countTupleTable(table);
+    var t = this.tables.map((table) => {
+      return this.countTupleTable(table);
     });
+    Promise.all(t).then(()=>{this.onRefresh()});
   }
 
   countTupleTable(table) {

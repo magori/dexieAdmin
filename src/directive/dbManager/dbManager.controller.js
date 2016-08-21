@@ -7,12 +7,12 @@ export class DbManagerController {
     this.$scope = $scope;
     this.$uibModal = $uibModal
     this.dbManager = dbManagerService;
+    this.tables = this.dbManager.getTables();
+    this.selectedTable = this.tables[0];
     this.dbManager.onRefresh(() => {
       this.tables = this.dbManager.getTables();
       this.displayData(this.selectedTable);
     });
-    this.tables = this.dbManager.getTables()
-    this.displayData(this.tables[0]);
   }
 
   animate($event, classCss, promise) {

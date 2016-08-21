@@ -22,12 +22,12 @@ var DbManagerController = exports.DbManagerController = function () {
     this.$scope = $scope;
     this.$uibModal = $uibModal;
     this.dbManager = dbManagerService;
+    this.tables = this.dbManager.getTables();
+    this.selectedTable = this.tables[0];
     this.dbManager.onRefresh(function () {
       _this.tables = _this.dbManager.getTables();
       _this.displayData(_this.selectedTable);
     });
-    this.tables = this.dbManager.getTables();
-    this.displayData(this.tables[0]);
   }
 
   _createClass(DbManagerController, [{

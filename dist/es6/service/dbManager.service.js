@@ -269,8 +269,11 @@ var DbManagerService = function () {
     value: function countTupleForEachTable() {
       var _this9 = this;
 
-      return this.tables.map(function (table) {
-        _this9.countTupleTable(table);
+      var t = this.tables.map(function (table) {
+        return _this9.countTupleTable(table);
+      });
+      Promise.all(t).then(function () {
+        _this9.onRefresh();
       });
     }
   }, {

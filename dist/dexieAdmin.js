@@ -23,12 +23,12 @@ var DbManagerController = exports.DbManagerController = function () {
     this.$scope = $scope;
     this.$uibModal = $uibModal;
     this.dbManager = dbManagerService;
+    this.tables = this.dbManager.getTables();
+    this.selectedTable = this.tables[0];
     this.dbManager.onRefresh(function () {
       _this.tables = _this.dbManager.getTables();
       _this.displayData(_this.selectedTable);
     });
-    this.tables = this.dbManager.getTables();
-    this.displayData(this.tables[0]);
   }
 
   _createClass(DbManagerController, [{
@@ -589,8 +589,11 @@ var DbManagerService = function () {
     value: function countTupleForEachTable() {
       var _this9 = this;
 
-      return this.tables.map(function (table) {
-        _this9.countTupleTable(table);
+      var t = this.tables.map(function (table) {
+        return _this9.countTupleTable(table);
+      });
+      Promise.all(t).then(function () {
+        _this9.onRefresh();
       });
     }
   }, {

@@ -16,4 +16,4 @@ angular.module('dexieAdmin', ['ui.bootstrap','angular-json-editor','ng.jsonedito
         });
     })
   .service('dbManagerService', DbManagerService)
-});
+  .directive('ngDexieAdmin', NgDexieAdminDirective);
