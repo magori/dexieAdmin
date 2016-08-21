@@ -3,10 +3,10 @@ import {DbDump} from './dbDump.service.js';
 
 export class DbManagerService {
 
-  constructor(dbManagerConfig) {
+  constructor(ngDexieAdminConfig) {
     'ngInject';
 
-    this.config(dbManagerConfig)
+    this.config(ngDexieAdminConfig)
     this.previsouSearch = "";
     this.countTupleForEachTable();
   }
@@ -138,6 +138,11 @@ export class DbManagerService {
 
   loadAll() {
     return Promise.all(this.tables.map((table) => this.load(table)));
+  }
+
+  deleteObject(table, object) {
+    var pk = table.schema.primKey.name;
+    return table.delete(object[pk]);
   }
 
   load(table) {

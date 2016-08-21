@@ -1,5 +1,5 @@
 import { DbManagerController } from './dbManager.controller';
-export function DbManagerDirective() {
+export function NgDexieAdminDirective() {
   'ngInject';
 
   let directive = {

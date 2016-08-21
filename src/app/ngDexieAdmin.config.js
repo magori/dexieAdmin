@@ -1,11 +1,10 @@
 /* global chance:false, Dexie:false */
 
-export class DbManagerConfig {
+export class NgDexieAdminConfig {
   constructor() {
     'ngInject';
 
     this.db = new Dexie("MyDatabases");
-    this.db.test = "test";
     this.db.version(1).stores({
       friends: "++id, name, age, isCloseFriend, contact.phone ",
       notes: "++id, title, date, *items",
@@ -14,9 +13,7 @@ export class DbManagerConfig {
   }
 
   onNewDb() {
-    return (db) => {
-      this.db = db;
-    }
+    return (db) => { this.db = db };
   }
 
   getDb() {
@@ -27,11 +24,25 @@ export class DbManagerConfig {
 
     var loadFirend = () => {
       var friends = [];
-      for (var i = 0; i < 3; i++) {
+      for (var i = 0; i < 5; i++) {
         friends.push({
           name: chance.name(),
           age: chance.age(),
+          gender: chance.gender(),
+          country: chance.country({ full: true }),
           contact: {
+            mail:{
+              prof:chance.email(),
+              private: chance.email()
+            },
+            phone: chance.phone()
+          },
+          contact2: {
+              mail:chance.email(),
+            phone: chance.phone()
+          },
+          contact3: {
+            mail:chance.email(),
             phone: chance.phone()
           }
         });
@@ -41,7 +52,7 @@ export class DbManagerConfig {
 
     var loadNote = () => {
       var notes = []
-      for (var i = 0; i < 1000; i++) {
+      for (var i = 0; i < 3; i++) {
         notes.push({
           title: 'tata'
         });

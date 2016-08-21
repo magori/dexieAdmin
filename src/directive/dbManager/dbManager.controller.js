@@ -84,16 +84,50 @@ export class DbManagerController {
   }
 
   displayRow(data) {
+    var self = this;
     this.$log.log(data);
     this.$uibModal.open({
-      controller: ['$scope', 'json', ($scope, json) => {
-        $scope.json = json
+
+      controller: ['$scope', 'json','$uibModalInstance','$timeout', ($scope, json, $uibModalInstance, $timeout) => {
+
+        delete json.$$hashKey;
+        $scope.obj = {data: json};
+
+        $scope.editorLoaded = function(jsonEditor){
+              jsonEditor.set(json);
+              $timeout(()=>{jsonEditor.expandAll();},150)
+        };
+        $scope.options = {
+          "mode": "tree",
+          "modes": [
+            "tree",
+            "text"
+          ],
+          "history": true
+        };
+
+        $scope.del = () => {
+          this.dbManager.deleteObject(this.selectedTable, $scope.obj.data).then(()=>{
+            self.displayData(self.selectedTable);
+            $uibModalInstance.close($scope.obj.data);
+          });
+
+        };
+        $scope.save =  () => {
+          self.selectedTable.put($scope.obj.data).then(()=>{
+            self.displayData(self.selectedTable);
+            $uibModalInstance.close($scope.obj.data);
+          });
+        };
+        $scope.cancel = () => {
+          $uibModalInstance.dismiss('cancel');
+        };
       }],
       templateUrl: 'displayJson.html',
       controllerAs: 'jsonCtrl',
       size: 'lg',
       resolve: {
-        json: () => JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
+        json: () => data //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
       }
     });
   }

@@ -15,13 +15,13 @@ var _dbDumpService = require('./dbDump.service.js');
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DbManagerService = function () {
-  DbManagerService.$inject = ["dbManagerConfig"];
-  function DbManagerService(dbManagerConfig) {
+  DbManagerService.$inject = ["ngDexieAdminConfig"];
+  function DbManagerService(ngDexieAdminConfig) {
     'ngInject';
 
     _classCallCheck(this, DbManagerService);
 
-    this.config(dbManagerConfig);
+    this.config(ngDexieAdminConfig);
     this.previsouSearch = "";
     this.countTupleForEachTable();
   }
@@ -190,6 +190,12 @@ var DbManagerService = function () {
       return Promise.all(this.tables.map(function (table) {
         return _this4.load(table);
       }));
+    }
+  }, {
+    key: 'deleteObject',
+    value: function deleteObject(table, object) {
+      var pk = table.schema.primKey.name;
+      return table.delete(object[pk]);
     }
   }, {
     key: 'load',

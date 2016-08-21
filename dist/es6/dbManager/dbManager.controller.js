@@ -129,20 +129,52 @@ var DbManagerController = exports.DbManagerController = function () {
   }, {
     key: "displayRow",
     value: function displayRow(data) {
+      var _this5 = this;
+
+      var self = this;
       this.$log.log(data);
       this.$uibModal.open({
-        controller: ['$scope', 'json', function ($scope, json) {
-          $scope.json = json;
+
+        controller: ['$scope', 'json', '$uibModalInstance', '$timeout', function ($scope, json, $uibModalInstance, $timeout) {
+
+          delete json.$$hashKey;
+          $scope.obj = { data: json };
+
+          $scope.editorLoaded = function (jsonEditor) {
+            jsonEditor.set(json);
+            $timeout(function () {
+              jsonEditor.expandAll();
+            }, 150);
+          };
+          $scope.options = {
+            "mode": "tree",
+            "modes": ["tree", "text"],
+            "history": true
+          };
+
+          $scope.del = function () {
+            _this5.dbManager.deleteObject(_this5.selectedTable, $scope.obj.data).then(function () {
+              self.displayData(self.selectedTable);
+              $uibModalInstance.close($scope.obj.data);
+            });
+          };
+          $scope.save = function () {
+            self.selectedTable.put($scope.obj.data).then(function () {
+              self.displayData(self.selectedTable);
+              $uibModalInstance.close($scope.obj.data);
+            });
+          };
+          $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+          };
         }],
         templateUrl: 'displayJson.html',
         controllerAs: 'jsonCtrl',
         size: 'lg',
         resolve: {
           json: function json() {
-            return JSON.stringify(data, function (k, v) {
-              return k != '$$hashKey' ? v : undefined;
-            }, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "");
-          }
+            return data;
+          } //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
         }
       });
     }
