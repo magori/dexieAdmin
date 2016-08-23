@@ -24,10 +24,12 @@ var DbManagerController = exports.DbManagerController = function () {
     this.dbManager = dbManagerService;
     this.tables = this.dbManager.getTables();
     this.selectedTable = this.tables[0];
+    this.selectedTableIndex = 0;
     this.dbManager.onRefresh(function () {
       _this.tables = _this.dbManager.getTables();
-      _this.displayData(_this.selectedTable);
+      _this.displayData(_this.selectedTableIndex);
     });
+    this.toDelete = {};
   }
 
   _createClass(DbManagerController, [{
@@ -74,6 +76,32 @@ var DbManagerController = exports.DbManagerController = function () {
       return this.dbManager.createDb();
     }
   }, {
+    key: "reolveIdsToDelete",
+    value: function reolveIdsToDelete() {
+      var _this3 = this;
+
+      var ids = [];
+      if (this.toDelete) {
+        Object.keys(this.toDelete).forEach(function (id) {
+          if (_this3.toDelete[id]) {
+            ids.push(id * 1);
+          }
+        });
+      }
+      return ids;
+    }
+  }, {
+    key: "nbDataToDelete",
+    value: function nbDataToDelete() {
+      return this.reolveIdsToDelete().length;
+    }
+  }, {
+    key: "deleteSelected",
+    value: function deleteSelected($event) {
+      var ids = this.reolveIdsToDelete();
+      this.animate($event, 'faa-flash', this.dbManager.delete(this.selectedTable, ids));
+    }
+  }, {
     key: "deleteAllDb",
     value: function deleteAllDb($event) {
       this.animate($event, 'faa-flash', this.dbManager.deleteAllTable());
@@ -106,30 +134,47 @@ var DbManagerController = exports.DbManagerController = function () {
   }, {
     key: "search",
     value: function search(textSearch) {
-      var _this3 = this;
+      var _this4 = this;
 
       this.dbManager.search(textSearch, this.selectedTable).then(function (result) {
-        _this3.dataTable = result;
-        _this3.$scope.$digest();
+        _this4.dataTable = result;
+        _this4.$scope.$digest();
       });
     }
   }, {
-    key: "displayData",
-    value: function displayData(table) {
-      var _this4 = this;
+    key: "checkAll",
+    value: function checkAll() {
+      var _this5 = this;
 
-      this.selectedTable = table;
-      this.selectedTableIndexes = this.dbManager.resolveColumns(table);
-      this.dbManager.buildData(table).then(function (list) {
-        return _this4.dataTable = list;
+      this.dataTable.forEach(function (data) {
+        return _this5.toDelete[data[_this5.dbManager.primaryKeyName(_this5.selectedTable)]] = _this5.checkAllForDelete;
+      });
+    }
+  }, {
+    key: "addOrRmoveToDelete",
+    value: function addOrRmoveToDelete($event, id) {
+      $event.stopPropagation();
+    }
+  }, {
+    key: "displayData",
+    value: function displayData(index) {
+      var _this6 = this;
+
+      this.checkAllForDelete = false;
+      this.toDelete = {};
+      this.selectedTableIndex = index;
+      this.selectedTable = this.tables[index];
+      this.columns = this.dbManager.resolveColumns(this.selectedTable);
+      this.dbManager.buildData(this.selectedTable).then(function (list) {
+        return _this6.dataTable = list;
       }).then(function () {
-        return _this4.$scope.$digest();
+        return _this6.$scope.$digest();
       });
     }
   }, {
     key: "displayRow",
     value: function displayRow(data) {
-      var _this5 = this;
+      var _this7 = this;
 
       var self = this;
       this.$log.log(data);
@@ -153,14 +198,14 @@ var DbManagerController = exports.DbManagerController = function () {
           };
 
           $scope.del = function () {
-            _this5.dbManager.deleteObject(_this5.selectedTable, $scope.obj.data).then(function () {
-              self.displayData(self.selectedTable);
+            _this7.dbManager.deleteObject(_this7.selectedTable, $scope.obj.data).then(function () {
+              self.displayData(self.selectedTableIndex);
               $uibModalInstance.close($scope.obj.data);
             });
           };
           $scope.save = function () {
             self.selectedTable.put($scope.obj.data).then(function () {
-              self.displayData(self.selectedTable);
+              self.displayData(self.selectedTableIndex);
               $uibModalInstance.close($scope.obj.data);
             });
           };

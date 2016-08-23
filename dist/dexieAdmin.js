@@ -25,10 +25,12 @@ var DbManagerController = exports.DbManagerController = function () {
     this.dbManager = dbManagerService;
     this.tables = this.dbManager.getTables();
     this.selectedTable = this.tables[0];
+    this.selectedTableIndex = 0;
     this.dbManager.onRefresh(function () {
       _this.tables = _this.dbManager.getTables();
-      _this.displayData(_this.selectedTable);
+      _this.displayData(_this.selectedTableIndex);
     });
+    this.toDelete = {};
   }
 
   _createClass(DbManagerController, [{
@@ -75,6 +77,32 @@ var DbManagerController = exports.DbManagerController = function () {
       return this.dbManager.createDb();
     }
   }, {
+    key: "reolveIdsToDelete",
+    value: function reolveIdsToDelete() {
+      var _this3 = this;
+
+      var ids = [];
+      if (this.toDelete) {
+        Object.keys(this.toDelete).forEach(function (id) {
+          if (_this3.toDelete[id]) {
+            ids.push(id * 1);
+          }
+        });
+      }
+      return ids;
+    }
+  }, {
+    key: "nbDataToDelete",
+    value: function nbDataToDelete() {
+      return this.reolveIdsToDelete().length;
+    }
+  }, {
+    key: "deleteSelected",
+    value: function deleteSelected($event) {
+      var ids = this.reolveIdsToDelete();
+      this.animate($event, 'faa-flash', this.dbManager.delete(this.selectedTable, ids));
+    }
+  }, {
     key: "deleteAllDb",
     value: function deleteAllDb($event) {
       this.animate($event, 'faa-flash', this.dbManager.deleteAllTable());
@@ -107,30 +135,47 @@ var DbManagerController = exports.DbManagerController = function () {
   }, {
     key: "search",
     value: function search(textSearch) {
-      var _this3 = this;
+      var _this4 = this;
 
       this.dbManager.search(textSearch, this.selectedTable).then(function (result) {
-        _this3.dataTable = result;
-        _this3.$scope.$digest();
+        _this4.dataTable = result;
+        _this4.$scope.$digest();
       });
     }
   }, {
-    key: "displayData",
-    value: function displayData(table) {
-      var _this4 = this;
+    key: "checkAll",
+    value: function checkAll() {
+      var _this5 = this;
 
-      this.selectedTable = table;
-      this.selectedTableIndexes = this.dbManager.resolveColumns(table);
-      this.dbManager.buildData(table).then(function (list) {
-        return _this4.dataTable = list;
+      this.dataTable.forEach(function (data) {
+        return _this5.toDelete[data[_this5.dbManager.primaryKeyName(_this5.selectedTable)]] = _this5.checkAllForDelete;
+      });
+    }
+  }, {
+    key: "addOrRmoveToDelete",
+    value: function addOrRmoveToDelete($event, id) {
+      $event.stopPropagation();
+    }
+  }, {
+    key: "displayData",
+    value: function displayData(index) {
+      var _this6 = this;
+
+      this.checkAllForDelete = false;
+      this.toDelete = {};
+      this.selectedTableIndex = index;
+      this.selectedTable = this.tables[index];
+      this.columns = this.dbManager.resolveColumns(this.selectedTable);
+      this.dbManager.buildData(this.selectedTable).then(function (list) {
+        return _this6.dataTable = list;
       }).then(function () {
-        return _this4.$scope.$digest();
+        return _this6.$scope.$digest();
       });
     }
   }, {
     key: "displayRow",
     value: function displayRow(data) {
-      var _this5 = this;
+      var _this7 = this;
 
       var self = this;
       this.$log.log(data);
@@ -154,14 +199,14 @@ var DbManagerController = exports.DbManagerController = function () {
           };
 
           $scope.del = function () {
-            _this5.dbManager.deleteObject(_this5.selectedTable, $scope.obj.data).then(function () {
-              self.displayData(self.selectedTable);
+            _this7.dbManager.deleteObject(_this7.selectedTable, $scope.obj.data).then(function () {
+              self.displayData(self.selectedTableIndex);
               $uibModalInstance.close($scope.obj.data);
             });
           };
           $scope.save = function () {
             self.selectedTable.put($scope.obj.data).then(function () {
-              self.displayData(self.selectedTable);
+              self.displayData(self.selectedTableIndex);
               $uibModalInstance.close($scope.obj.data);
             });
           };
@@ -198,7 +243,7 @@ function NgDexieAdminDirective() {
 
   var directive = {
     restrict: 'E',
-    template: '<style>\r\n\r\n</style><script type="text/ng-template" id="displayJson.html"><div class="modal-body"> <!-- <div json-editor model="json" options="options" style="height: 400px;"/> --> <div ng-jsoneditor="editorLoaded" ng-model="obj.data" options="options" style="height: 80vh;"></div> <!-- <json-tree json="json" ng-model="json" edit-level="low" collapsed-level="-1"></json-tree> --> <!-- <json-editor schema="mySchema" startval="json" on-change="onChange($editorValue)"></json-editor> --> <!-- <div style="height: 400px;" json-editor type="text" model="json" options="options"/> --> <!-- <json-editor-input model="json" configuration="configuration"/> --> <!-- <textarea ng-model="json" json class="form-control" style="height:75vh"> </textarea> --> </div> <div class="modal-footer"> <button class="btn btn-danger" type="button" ng-click="del()">Delete</button> <button class="btn btn-primary" type="button" ng-click="save()">Save</button> <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> </div></script><div class="row"><div class="col-xs-3"><div class="panel panel-default"><div class="panel-heading clearfix"><div class="btn-toolbar" role="toolbar"><div class="pull-left panel-title"><span class="badge">{{ dbManger.tables.length}}</span></div><div class="btn-group pull-right"><div ng-click="dbManger.dump($event)" class="btn btn-default" title="Dump"><i class="fa fa-floppy-o" aria-hidden="true"></i></div><div ng-click="dbManger.loadAll($event)" class="btn btn-default" title="Load all"><i class="fa fa-refresh" aria-hidden="true"></i></div><div ng-click="dbManger.deleteAllDb($event)" class="btn btn-default" title="Empty DB"><i class="fa fa-trash-o" aria-hidden="true"></i></div><div ng-click="dbManger.drop($event)" class="btn btn-danger" title="Drop"><i class="fa fa-trash-o" aria-hidden="true"></i></div></div></div></div><div class="list-group" ng-repeat="table in dbManger.tables track by table.name" ng-click="dbManger.displayData(table)"><div class="list-group-item" ng-class="dbManger.selectedTable.name===table.name ? \'active\':\'\'" style="cursor:pointer"><div class="list-group-item-heading clearfix"><div class="pull-left panel-title"><span class="badge">{{table.nbRow}}</span> <span class="panel-title" style="padding-top: 7.5px;">{{table.name}}</span></div><div class="btn-group pull-right"><div ng-if="dbManger.hasActionLoad(table)" ng-click="dbManger.load($event,table)" class="btn btn-default" title="Load table"><i class="fa fa-refresh" aria-hidden="true"></i></div><div ng-click="dbManger.save($event, table)" class="btn btn-default" title="Dump table"><i class="fa fa-floppy-o" fa-stack-1x aria-hidden="true"></i></div><div ng-if="dbManger.hasDelete(table)" ng-click="dbManger.delete($event, table)" class="btn btn-default" title="Clear table"><i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i></div><div ng-if="!dbManger.hasDelete(table)" ng-click="dbManger.forceDelete($event, table)" class="btn btn-danger" title="Force clear table"><i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i></div></div></div><p class="list-group-item-text"><i class="fa fa-key" aria-hidden="true"></i> {{table.schema.primKey.name}} : {{table.schema.primKey.auto}}</p><p class="list-group-item-text"></p>index: <span ng-repeat="indexe in table.schema.indexes">{{indexe.src}},</span><p></p></div></div></div></div><div class="col-xs-9"><div class="panel panel-default"><div class="panel-heading">{{dbManger.selectedTable.name}}</div><div class="panel-body"><form><div class="row"><div class="form-group col-xs-12"><div class="input-group input-group"><span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span> <input type="text" class="form-control" ng-change="dbManger.search(dbManger.searchValue)" ng-model-options="{ debounce: 250 }" ng-model="dbManger.searchValue"> <span class="input-group-addon"><span class="badge">{{dbManger.dataTable.length}}</span></span></div></div></div></form><div style="height: 70vh !important;overflow-y: auto;"><table class="table table-striped table-condensed"><colgroup><col class="del"><col class="{{::dbManger.selectedTable.schema.primKey.name}}"><col ng-repeat="indexe in dbManger.selectedTable.schema.indexes" class="{{::indexe.name}}"></colgroup><thead><tr><th><input type="checkbox" name="del"></th><th><i class="fa fa-key" aria-hidden="true"></i>PK</th><th ng-repeat="indexe in dbManger.selectedTableIndexes">{{::indexe}}</th></tr></thead><tbody><tr ng-repeat="data in dbManger.dataTable | limitTo:150" ng-click="dbManger.displayRow(data)"><td><input type="checkbox" name="del"></td><td>{{data[dbManger.selectedTable.schema.primKey.name]}}</td><td ng-repeat="indexe in dbManger.selectedTableIndexes">{{data[indexe]}}</td></tr></tbody></table></div></div></div></div></div>',
+    template: '<style>\r\n\r\n</style><script type="text/ng-template" id="displayJson.html"><div class="modal-body"> <div ng-jsoneditor="editorLoaded" ng-model="obj.data" options="options" style="height: 80vh;"></div> </div> <div class="modal-footer"> <button class="btn btn-danger" type="button" ng-click="del()">Delete</button> <button class="btn btn-primary" type="button" ng-click="save()">Save</button> <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button> </div></script><div class="row"><div class="col-xs-3"><div class="panel panel-default"><div class="panel-heading clearfix"><div class="btn-toolbar" role="toolbar"><div class="pull-left panel-title"><span class="badge">{{ dbManger.tables.length}}</span></div><div class="btn-group pull-right"><div ng-click="dbManger.dump($event)" class="btn btn-default" title="Dump"><i class="fa fa-floppy-o" aria-hidden="true"></i></div><div ng-click="dbManger.loadAll($event)" class="btn btn-default" title="Load all"><i class="fa fa-refresh" aria-hidden="true"></i></div><div ng-click="dbManger.deleteAllDb($event)" class="btn btn-default" title="Empty DB"><i class="fa fa-trash-o" aria-hidden="true"></i></div><div ng-click="dbManger.drop($event)" class="btn btn-danger" title="Drop"><i class="fa fa-trash-o" aria-hidden="true"></i></div></div></div></div><div class="list-group" ng-repeat="(index,table) in dbManger.tables track by table.name" ng-click="dbManger.displayData(index)"><div class="list-group-item" ng-class="dbManger.selectedTable.name===table.name ? \'active\':\'\'" style="cursor:pointer"><div class="list-group-item-heading clearfix"><div class="pull-left panel-title"><span class="badge">{{table.nbRow}}</span> <span class="panel-title" style="padding-top: 7.5px;">{{table.name}}</span></div><div class="btn-group pull-right"><div ng-if="dbManger.hasActionLoad(table)" ng-click="dbManger.load($event,table)" class="btn btn-default" title="Load table"><i class="fa fa-refresh" aria-hidden="true"></i></div><div ng-click="dbManger.save($event, table)" class="btn btn-default" title="Dump table"><i class="fa fa-floppy-o" fa-stack-1x aria-hidden="true"></i></div><div ng-if="dbManger.hasDelete(table)" ng-click="dbManger.delete($event, table)" class="btn btn-default" title="Clear table"><i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i></div><div ng-if="!dbManger.hasDelete(table)" ng-click="dbManger.forceDelete($event, table)" class="btn btn-danger" title="Force clear table"><i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i></div></div></div><p class="list-group-item-text"><i class="fa fa-key" aria-hidden="true"></i> {{table.schema.primKey.name}} : {{table.schema.primKey.auto}}</p><p class="list-group-item-text"></p>index: <span ng-repeat="indexe in table.schema.indexes">{{indexe.src}},</span><p></p></div></div></div></div><div class="col-xs-9"><div class="panel panel-default"><div class="panel-heading clearfix">{{dbManger.selectedTable.name}}<div class="btn-group pull-right"><div ng-style="dbManger.nbDataToDelete()?{opacity:100}:{opacity:0}" ng-click="dbManger.deleteSelected($event, table)" class="btn btn-default" title="Delete selected data">{{dbManger.nbDataToDelete()}} <i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i></div></div></div><div class="panel-body"><form><div class="row"><div class="form-group col-xs-12"><div class="input-group input-group"><span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span> <input type="text" class="form-control" ng-change="dbManger.search(dbManger.searchValue)" ng-model-options="{ debounce: 250 }" ng-model="dbManger.searchValue"> <span class="input-group-addon"><span class="badge">{{dbManger.dataTable.length}}</span></span></div></div></div></form><div style="height: 70vh !important;overflow-y: auto;"><table class="table table-striped table-condensed"><colgroup><col class="del"><col class="{{::dbManger.selectedTable.schema.primKey.name}}"><col ng-repeat="indexe in dbManger.selectedTable.schema.indexes" class="{{::indexe.name}}"></colgroup><thead><tr><th><input type="checkbox" name="del" ng-click="dbManger.checkAll()" ng-model="dbManger.checkAllForDelete"></th><th><i class="fa fa-key" aria-hidden="true"></i>PK</th><th ng-repeat="indexe in dbManger.columns">{{::indexe}}</th></tr></thead><tbody><tr ng-repeat="data in dbManger.dataTable | limitTo:150" ng-click="dbManger.displayRow(data)"><td><input type="checkbox" ng-click="$event.stopPropagation()" ng-model="dbManger.toDelete[data[dbManger.selectedTable.schema.primKey.name]]" name="del" d></td><td>{{data[dbManger.selectedTable.schema.primKey.name]}}</td><td ng-repeat="indexe in dbManger.columns">{{data[indexe]}}</td></tr></tbody></table></div></div></div></div></div>',
     controller: _dbManager.DbManagerController,
     controllerAs: 'dbManger',
     bindToController: true
@@ -213,19 +258,7 @@ var _dbManager = require('./service/dbManager.service');
 
 var _ngDexieAdmin = require('./dbManager/ngDexieAdmin.directive');
 
-angular.module('dexieAdmin', ['ui.bootstrap', 'angular-json-editor', 'ng.jsoneditor']).config(["JSONEditorProvider", function (JSONEditorProvider) {
-    JSONEditorProvider.configure({
-        defaults: {
-            options: {
-                iconlib: 'fontawesome4',
-                theme: 'bootstrap3',
-                disable_edit_json: false,
-                disable_properties: true,
-                disable_collapse: true
-            }
-        }
-    });
-}]).service('dbManagerService', _dbManager.DbManagerService).directive('ngDexieAdmin', _ngDexieAdmin.NgDexieAdminDirective);
+angular.module('ng.dexieadmin', ['ui.bootstrap', 'ng.jsoneditor']).service('dbManagerService', _dbManager.DbManagerService).directive('ngDexieAdmin', _ngDexieAdmin.NgDexieAdminDirective);
 },{"./dbManager/ngDexieAdmin.directive":2,"./service/dbManager.service":5}],4:[function(require,module,exports){
 "use strict";
 
@@ -417,8 +450,8 @@ var DbManagerService = function () {
     key: 'buildData',
     value: function buildData(table) {
       var selectedTableIndexes = this.resolveColumns(table);
-      var dottedIndexes = selectedTableIndexes.filter(function (inedexe) {
-        return inedexe.includes(".");
+      var dottedIndexes = selectedTableIndexes.filter(function (inedex) {
+        return inedex.includes(".");
       });
       var indexes = [];
       dottedIndexes.forEach(function (indexe) {
@@ -493,14 +526,26 @@ var DbManagerService = function () {
     }
   }, {
     key: 'delete',
-    value: function _delete(table) {
+    value: function _delete(table, ids) {
       var _this3 = this;
 
-      return table.clear().then(function () {
+      var promise = new Promise(function () {});
+      if (table && !ids) {
+        promise = table.clear();
+      } else if (table && ids) {
+        promise = table.bulkDelete(ids);
+      }
+      return promise.then(function () {
         return _this3.countTupleTable(table);
       }).then(function () {
         return _this3.onRefresh();
       });
+    }
+  }, {
+    key: 'deleteObject',
+    value: function deleteObject(table, object) {
+      var pk = this.primaryKeyName(table);
+      return table.delete(object[pk]);
     }
   }, {
     key: 'loadAll',
@@ -510,12 +555,6 @@ var DbManagerService = function () {
       return Promise.all(this.tables.map(function (table) {
         return _this4.load(table);
       }));
-    }
-  }, {
-    key: 'deleteObject',
-    value: function deleteObject(table, object) {
-      var pk = table.schema.primKey.name;
-      return table.delete(object[pk]);
     }
   }, {
     key: 'load',
@@ -543,7 +582,7 @@ var DbManagerService = function () {
   }, {
     key: 'createDb',
     value: function createDb() {
-      var db = new Dexie(this.dbDump.dbName);
+      var db = new Dexie(this.dbDump.dbName + "ddd");
       db.version(1).stores(this.dbDump.tableDef);
       return db;
     }
@@ -553,17 +592,19 @@ var DbManagerService = function () {
       var _this6 = this;
 
       return this.db.delete().then(function () {
-        return _this6.createDb().open();
+        return _this6.createDb();
       }).then(function (db) {
-        _this6.db = db;
-        if (_this6.onNewDb) {
-          _this6.onNewDb(_this6.db);
-        }
-        _this6.tables = db.tables;
-        _this6.dbDump.config({
-          db: db
+        db.open().then(function () {
+          _this6.db = db;
+          _this6.tables = db.tables;
+          if (_this6.onNewDb) {
+            _this6.onNewDb(_this6.db);
+          }
+          _this6.dbDump.config({
+            db: db
+          });
+          _this6.countTupleForEachTable();
         });
-        _this6.countTupleForEachTable();
       });
     }
   }, {
@@ -589,12 +630,24 @@ var DbManagerService = function () {
     value: function countTupleForEachTable() {
       var _this9 = this;
 
-      var t = this.tables.map(function (table) {
-        return _this9.countTupleTable(table);
-      });
-      Promise.all(t).then(function () {
-        _this9.onRefresh();
-      });
+      var i = 0;
+      var size = this.tables.length;
+      var f = function f() {
+        if (i < size) {
+          _this9.countTupleTable(_this9.tables[i]).then(function () {
+            i++;
+            f();
+          });
+        } else {
+          _this9.onRefresh();
+        }
+      };
+      f();
+      // var t = this.tables.map((table) => {
+      //   return
+      //   this.countTupleTable(table);
+      // });
+      //Promise.all(t).then(()=>{this.onRefresh()});
     }
   }, {
     key: 'countTupleTable',
@@ -602,6 +655,11 @@ var DbManagerService = function () {
       return table.count().then(function (nb) {
         table.nbRow = nb;
       });
+    }
+  }, {
+    key: 'primaryKeyName',
+    value: function primaryKeyName(table) {
+      return table.schema.primKey.name;
     }
   }, {
     key: 'search',

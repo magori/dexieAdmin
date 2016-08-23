@@ -71,7 +71,7 @@ export class DbManagerService {
 
   buildData(table) {
     var selectedTableIndexes = this.resolveColumns(table);
-    var dottedIndexes = selectedTableIndexes.filter((inedexe) => inedexe.includes("."))
+    var dottedIndexes = selectedTableIndexes.filter((inedex) => inedex.includes("."))
     var indexes = [];
     dottedIndexes.forEach((indexe) => {
       indexes.push({
@@ -132,18 +132,26 @@ export class DbManagerService {
     return Promise.all(this.tables.map(table => (this.hasDelete(table)) ? this.delete(table) : false));
   }
 
-  delete(table) {
-    return table.clear().then(() => this.countTupleTable(table)).then(() => this.onRefresh());
+  delete(table, ids) {
+    var promise = new Promise(()=>{});
+    if(table && !ids){
+      promise = table.clear();
+    } else if(table && ids) {
+      promise = table.bulkDelete(ids);
+    }
+    return promise.then(() => this.countTupleTable(table)).then(() => this.onRefresh());
   }
+
+  deleteObject(table, object) {
+    var pk = this.primaryKeyName(table);
+    return table.delete(object[pk]);
+  }
+
 
   loadAll() {
     return Promise.all(this.tables.map((table) => this.load(table)));
   }
 
-  deleteObject(table, object) {
-    var pk = table.schema.primKey.name;
-    return table.delete(object[pk]);
-  }
 
   load(table) {
     var action = this.resolveActionLoad(table)
@@ -162,24 +170,26 @@ export class DbManagerService {
   }
 
   createDb() {
-    var db = new Dexie(this.dbDump.dbName);
+    var db = new Dexie(this.dbDump.dbName+"ddd");
     db.version(1).stores(this.dbDump.tableDef)
     return db;
   }
 
   drop() {
     return this.db.delete()
-      .then(() => this.createDb().open())
+      .then(() => this.createDb())
       .then((db) => {
-        this.db = db
-        if (this.onNewDb) {
-          this.onNewDb(this.db)
-        }
-        this.tables = db.tables;
-        this.dbDump.config({
-          db: db
+        db.open().then(()=>{
+          this.db = db;
+          this.tables = db.tables;
+          if (this.onNewDb) {
+            this.onNewDb(this.db)
+          }
+          this.dbDump.config({
+            db: db
+          });
+           this.countTupleForEachTable();
         });
-        this.countTupleForEachTable();
       });
   }
 
@@ -192,16 +202,34 @@ export class DbManagerService {
   }
 
   countTupleForEachTable() {
-    var t = this.tables.map((table) => {
-      return this.countTupleTable(table);
-    });
-    Promise.all(t).then(()=>{this.onRefresh()});
+    var i = 0;
+    var size = this.tables.length;
+    var f = () =>{
+          if(i<size){
+            this.countTupleTable(this.tables[i]).then(()=>{
+              i++;
+              f();
+            });
+          } else {
+            this.onRefresh();
+          }
+    }
+    f();
+    // var t = this.tables.map((table) => {
+    //   return
+    //   this.countTupleTable(table);
+    // });
+    //Promise.all(t).then(()=>{this.onRefresh()});
   }
 
   countTupleTable(table) {
     return table.count().then((nb) => {
       table.nbRow = nb;
     });
+  }
+
+  primaryKeyName(table){
+    return table.schema.primKey.name;
   }
 
   search(textSearch, table) {

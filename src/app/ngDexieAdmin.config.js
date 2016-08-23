@@ -6,9 +6,10 @@ export class NgDexieAdminConfig {
 
     this.db = new Dexie("MyDatabases");
     this.db.version(1).stores({
-      friends: "++id, name, age, isCloseFriend, contact.phone ",
+      friends: "++id, name, age, isCloseFriend, contact.phone",
       notes: "++id, title, date, *items",
-      noLoadAction: "++id"
+      noLoadAction: "++id",
+      budget:"++id, titre"
     });
   }
 
@@ -66,7 +67,8 @@ export class NgDexieAdminConfig {
         columns: {
           id: false,
           time: false,
-          isCloseFriend:false
+          isCloseFriend:false,
+          'contact.mail.prof':true
         },
         order: 2,
         noDelete: true,

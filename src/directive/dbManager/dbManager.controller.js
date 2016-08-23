@@ -9,10 +9,12 @@ export class DbManagerController {
     this.dbManager = dbManagerService;
     this.tables = this.dbManager.getTables();
     this.selectedTable = this.tables[0];
+    this.selectedTableIndex = 0;
     this.dbManager.onRefresh(() => {
       this.tables = this.dbManager.getTables();
-      this.displayData(this.selectedTable);
+      this.displayData(this.selectedTableIndex);
     });
+    this.toDelete = {};
   }
 
   animate($event, classCss, promise) {
@@ -46,6 +48,27 @@ export class DbManagerController {
     return this.dbManager.createDb();
   }
 
+  reolveIdsToDelete(){
+    var ids = [];
+    if(this.toDelete){
+      Object.keys(this.toDelete).forEach((id) => {
+        if(this.toDelete[id]){
+          ids.push(id*1);
+        }
+      });
+    }
+    return ids;
+  }
+
+  nbDataToDelete(){
+    return this.reolveIdsToDelete().length;
+  }
+
+  deleteSelected($event) {
+    var ids = this.reolveIdsToDelete();
+    this.animate($event, 'faa-flash', this.dbManager.delete(this.selectedTable, ids));
+  }
+
   deleteAllDb($event) {
     this.animate($event, 'faa-flash', this.dbManager.deleteAllTable());
   }
@@ -77,10 +100,21 @@ export class DbManagerController {
     });
   }
 
-  displayData(table) {
-    this.selectedTable = table;
-    this.selectedTableIndexes = this.dbManager.resolveColumns(table);
-    this.dbManager.buildData(table).then((list) => this.dataTable = list).then(()=>this.$scope.$digest());
+  checkAll(){
+    this.dataTable.forEach((data)=>this.toDelete[data[this.dbManager.primaryKeyName(this.selectedTable)]]= this.checkAllForDelete)
+  }
+
+  addOrRmoveToDelete($event, id){
+      $event.stopPropagation()
+  }
+
+  displayData(index) {
+    this.checkAllForDelete = false;
+    this.toDelete = {};
+    this.selectedTableIndex = index;
+    this.selectedTable = this.tables[index];
+    this.columns = this.dbManager.resolveColumns(this.selectedTable);
+    this.dbManager.buildData(this.selectedTable).then((list) => this.dataTable = list).then(()=>this.$scope.$digest());
   }
 
   displayRow(data) {
@@ -108,14 +142,14 @@ export class DbManagerController {
 
         $scope.del = () => {
           this.dbManager.deleteObject(this.selectedTable, $scope.obj.data).then(()=>{
-            self.displayData(self.selectedTable);
+            self.displayData(self.selectedTableIndex);
             $uibModalInstance.close($scope.obj.data);
           });
 
         };
         $scope.save =  () => {
           self.selectedTable.put($scope.obj.data).then(()=>{
-            self.displayData(self.selectedTable);
+            self.displayData(self.selectedTableIndex);
             $uibModalInstance.close($scope.obj.data);
           });
         };

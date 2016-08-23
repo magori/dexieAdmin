@@ -3,13 +3,7 @@
 </style>
 <script type="text/ng-template" id="displayJson.html">
   <div class="modal-body">
-    <!-- <div json-editor model="json" options="options" style="height: 400px;"/> -->
     <div ng-jsoneditor="editorLoaded"  ng-model="obj.data" options="options" style="height: 80vh;"></div>
-    <!-- <json-tree json="json" ng-model="json"  edit-level="low" collapsed-level="-1"></json-tree> -->
-     <!-- <json-editor schema="mySchema" startval="json" on-change="onChange($editorValue)"></json-editor> -->
-     <!-- <div style="height: 400px;" json-editor type="text" model="json" options="options"/> -->
-     <!-- <json-editor-input model="json" configuration="configuration"/> -->
-     <!-- <textarea ng-model="json" json class="form-control" style="height:75vh"> </textarea> -->
   </div>
   <div class="modal-footer">
     <button class="btn btn-danger" type="button" ng-click="del()">Delete</button>
@@ -41,7 +35,7 @@
               </div>
             </div>
           </div>
-          <div class="list-group" ng-repeat="table in dbManger.tables track by table.name" ng-click="dbManger.displayData(table)">
+          <div class="list-group" ng-repeat="(index,table) in dbManger.tables track by table.name" ng-click="dbManger.displayData(index)">
             <div class="list-group-item " ng-class="dbManger.selectedTable.name===table.name ? 'active':''" style ="cursor:pointer">
               <div class="list-group-item-heading clearfix">
                 <div class="pull-left panel-title">
@@ -76,8 +70,13 @@
       </div>
       <div class="col-xs-9">
         <div class="panel panel-default">
-          <div class="panel-heading">
+          <div class="panel-heading clearfix">
             {{dbManger.selectedTable.name}}
+            <div class="btn-group pull-right">
+              <div ng-style="dbManger.nbDataToDelete()?{opacity:100}:{opacity:0}" ng-click="dbManger.deleteSelected($event, table)" class="btn  btn-default" title="Delete selected data">
+                {{dbManger.nbDataToDelete()}} <i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i>
+              </div>
+            </div>
           </div>
           <div class="panel-body">
             <form>
@@ -94,10 +93,6 @@
                   </div>
                 </div>
               </div>
-              <!-- <div class="input-group input-group pull-left" ng-repeat="indexe in dbManger.selectedTable.schema.indexes">
-              <span class="input-group-addon"><i class="fa fa-search" aria-hidden="true"></i></span>
-              <input type="text" class="form-control" ng-model="dbManger.search" />
-            </div> -->
             </form>
             <div style="height: 70vh !important;overflow-y: auto;">
               <table class="table table-striped table-condensed">
@@ -108,16 +103,16 @@
                 </colgroup>
                 <thead>
                   <tr>
-                    <th><input type="checkbox" name="del" value="" /></th>
+                    <th><input type="checkbox" name="del" ng-click="dbManger.checkAll()" ng-model="dbManger.checkAllForDelete"/></th>
                     <th><i class="fa fa-key" aria-hidden="true"></i>PK</th>
-                    <th ng-repeat="indexe in dbManger.selectedTableIndexes">{{::indexe}}</th>
+                    <th ng-repeat="indexe in dbManger.columns">{{::indexe}}</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr ng-repeat="data in dbManger.dataTable | limitTo:150" ng-click="dbManger.displayRow(data)">
-                    <td><input type="checkbox" name="del" value="" /> </td>
+                    <td><input type="checkbox" ng-click="$event.stopPropagation()" ng-model="dbManger.toDelete[data[dbManger.selectedTable.schema.primKey.name]]" name="del" d /> </td>
                     <td>{{data[dbManger.selectedTable.schema.primKey.name]}}
-                    <td ng-repeat="indexe in dbManger.selectedTableIndexes">{{data[indexe]}}</td>
+                    <td ng-repeat="indexe in dbManger.columns">{{data[indexe]}}</td>
                   </tr>
                 </tbody>
               </table>

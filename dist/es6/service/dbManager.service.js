@@ -97,8 +97,8 @@ var DbManagerService = function () {
     key: 'buildData',
     value: function buildData(table) {
       var selectedTableIndexes = this.resolveColumns(table);
-      var dottedIndexes = selectedTableIndexes.filter(function (inedexe) {
-        return inedexe.includes(".");
+      var dottedIndexes = selectedTableIndexes.filter(function (inedex) {
+        return inedex.includes(".");
       });
       var indexes = [];
       dottedIndexes.forEach(function (indexe) {
@@ -173,14 +173,26 @@ var DbManagerService = function () {
     }
   }, {
     key: 'delete',
-    value: function _delete(table) {
+    value: function _delete(table, ids) {
       var _this3 = this;
 
-      return table.clear().then(function () {
+      var promise = new Promise(function () {});
+      if (table && !ids) {
+        promise = table.clear();
+      } else if (table && ids) {
+        promise = table.bulkDelete(ids);
+      }
+      return promise.then(function () {
         return _this3.countTupleTable(table);
       }).then(function () {
         return _this3.onRefresh();
       });
+    }
+  }, {
+    key: 'deleteObject',
+    value: function deleteObject(table, object) {
+      var pk = this.primaryKeyName(table);
+      return table.delete(object[pk]);
     }
   }, {
     key: 'loadAll',
@@ -190,12 +202,6 @@ var DbManagerService = function () {
       return Promise.all(this.tables.map(function (table) {
         return _this4.load(table);
       }));
-    }
-  }, {
-    key: 'deleteObject',
-    value: function deleteObject(table, object) {
-      var pk = table.schema.primKey.name;
-      return table.delete(object[pk]);
     }
   }, {
     key: 'load',
@@ -223,7 +229,7 @@ var DbManagerService = function () {
   }, {
     key: 'createDb',
     value: function createDb() {
-      var db = new Dexie(this.dbDump.dbName);
+      var db = new Dexie(this.dbDump.dbName + "ddd");
       db.version(1).stores(this.dbDump.tableDef);
       return db;
     }
@@ -233,17 +239,19 @@ var DbManagerService = function () {
       var _this6 = this;
 
       return this.db.delete().then(function () {
-        return _this6.createDb().open();
+        return _this6.createDb();
       }).then(function (db) {
-        _this6.db = db;
-        if (_this6.onNewDb) {
-          _this6.onNewDb(_this6.db);
-        }
-        _this6.tables = db.tables;
-        _this6.dbDump.config({
-          db: db
+        db.open().then(function () {
+          _this6.db = db;
+          _this6.tables = db.tables;
+          if (_this6.onNewDb) {
+            _this6.onNewDb(_this6.db);
+          }
+          _this6.dbDump.config({
+            db: db
+          });
+          _this6.countTupleForEachTable();
         });
-        _this6.countTupleForEachTable();
       });
     }
   }, {
@@ -269,12 +277,24 @@ var DbManagerService = function () {
     value: function countTupleForEachTable() {
       var _this9 = this;
 
-      var t = this.tables.map(function (table) {
-        return _this9.countTupleTable(table);
-      });
-      Promise.all(t).then(function () {
-        _this9.onRefresh();
-      });
+      var i = 0;
+      var size = this.tables.length;
+      var f = function f() {
+        if (i < size) {
+          _this9.countTupleTable(_this9.tables[i]).then(function () {
+            i++;
+            f();
+          });
+        } else {
+          _this9.onRefresh();
+        }
+      };
+      f();
+      // var t = this.tables.map((table) => {
+      //   return
+      //   this.countTupleTable(table);
+      // });
+      //Promise.all(t).then(()=>{this.onRefresh()});
     }
   }, {
     key: 'countTupleTable',
@@ -282,6 +302,11 @@ var DbManagerService = function () {
       return table.count().then(function (nb) {
         table.nbRow = nb;
       });
+    }
+  }, {
+    key: 'primaryKeyName',
+    value: function primaryKeyName(table) {
+      return table.schema.primKey.name;
     }
   }, {
     key: 'search',
