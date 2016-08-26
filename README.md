@@ -17,7 +17,7 @@ Install via bower
 #### Initialize
 ```javascript
 // require module in your app:
-var app = angular.module('exampleApp', ['ngDexieAdmin'])
+var app = angular.module('exampleApp', ['ngDexieadmin'])
           .service('ngDexieAdminConfig', function () {
             var db = new Dexie("MyDatabases");
                  db.version(1).stores({
