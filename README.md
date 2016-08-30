@@ -37,15 +37,19 @@ var app = angular.module('exampleApp', ['ng.dexieadmin'])
           });
 ```    
 
-Then include the libs, bootstrap, ui-bootstrap, fontawsome, and [ngEditor(ng-editor)](https://github.com/angular-tools/ng-jsoneditor) in your html (you can also use the minified versions)
+Then include the libs, bootstrap, ui-bootstrap, fontawsome, jsoneditor, and [ngEditor(ng-editor)](https://github.com/angular-tools/ng-jsoneditor) in your html (you can also use the minified versions)
     
 ```html
   <link rel="stylesheet" href="bower_components/bootstrap/dist/css/bootstrap.css" />
   <link rel="stylesheet" href="bower_components/font-awesome/css/font-awesome.css" />
   <link rel="stylesheet" href="bower_components/font-awesome-animation/dist/font-awesome-animation.css" />
+  <link rel="stylesheet" href="../bower_components/jsoneditor/dist/jsoneditor.min.css" />
   ....
   <script src="bower_components/dexie/dist/dexie.min.js"></script> 
-  <script src="bower_components/ng-dexie-admin/dist/ngDexieAdmin.js"></script>
   <script src="bower_components/angular-bootstrap/ui-bootstrap-tpls.js"></script>
+  <script src="bower_components/jsoneditor/dist/jsoneditor.min.js"></script>
+  <script src="bower_components/ng-jsoneditor/ng-jsoneditor.min.js"></script>
+  <script src="bower_components/ng-dexie-admin/dist/ngDexieAdmin.js"></script>
+
 ```
 
