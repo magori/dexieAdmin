@@ -27,7 +27,7 @@ var db = new Dexie("MyDatabases");
 });
 
 // require module in your app.
-var app = angular.module('exampleApp', ['ng.dexieadmin''])
+var app = angular.module('exampleApp', ['ng.dexieadmin'])
           .service('ngDexieAdminConfig', function () {
             return {
               getDb : function () {
