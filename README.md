@@ -1,6 +1,6 @@
 # ngDexieAdmin
 A administration interface for [dexie](http://dexie.org). 
-You can read, delete, dump, and search data in tables.
+You can read, delete, edit, dump, and search data in tables.
 The interface is made with [Bootstrap 3](http://getbootstrap.com/), [UI Bootstrap](https://angular-ui.github.io/bootstrap) and [fontawesome](http://fontawesome.io)
 
 You can try the [demo on plunker](http://embed.plnkr.co/obhiwZ/)
