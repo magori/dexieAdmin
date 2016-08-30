@@ -18,7 +18,7 @@ Install via bower
 
 #### Initialize
 ```javascript
-// Creat the db wher you want.
+// Creat the db where you want.
 var db = new Dexie("MyDatabases");
  db.version(1).stores({
   friends: "++id, name, age, isCloseFriend, contact.phone ",
