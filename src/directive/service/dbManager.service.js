@@ -48,6 +48,14 @@ export class DbManagerService {
     return this.resolveConfigType('columns')[tableName];
   }
 
+  displayEditConfig(tableName) {
+    var conf = this.resolveConfigType('displayEdit');
+    if(conf){
+      return conf[tableName];
+    }
+    return null;
+  }
+
   resolveColumns(table) {
     var columns = this.columnsToDisplay(table.name);
     if (!columns) {
@@ -132,6 +140,19 @@ export class DbManagerService {
     return Promise.all(this.tables.map(table => (this.hasDelete(table)) ? this.delete(table) : false));
   }
 
+  add(table, objet){
+    return table.put(objet);
+  }
+
+  save(table, objet){
+    return table.put(objet);
+  }
+
+  deleteObject(table, object) {
+    var pk = this.primaryKeyName(table);
+    return table.delete(object[pk]);
+  }
+
   delete(table, ids) {
     var promise = new Promise(()=>{});
     if(table && !ids){
@@ -142,16 +163,9 @@ export class DbManagerService {
     return promise.then(() => this.countTupleTable(table)).then(() => this.onRefresh());
   }
 
-  deleteObject(table, object) {
-    var pk = this.primaryKeyName(table);
-    return table.delete(object[pk]);
-  }
-
-
   loadAll() {
     return Promise.all(this.tables.map((table) => this.load(table)));
   }
-
 
   load(table) {
     var action = this.resolveActionLoad(table)
@@ -215,11 +229,6 @@ export class DbManagerService {
           }
     }
     f();
-    // var t = this.tables.map((table) => {
-    //   return
-    //   this.countTupleTable(table);
-    // });
-    //Promise.all(t).then(()=>{this.onRefresh()});
   }
 
   countTupleTable(table) {
@@ -270,7 +279,7 @@ export class DbManagerService {
     });
     var url = window.URL.createObjectURL(data);
     var a = document.createElement('a');
-    a.style = "display: none";
+    a.style.display = "none";
     a.href = url;
     a.download = "dump_" + new Date().getTime() + ".txt";
     document.body.appendChild(a);

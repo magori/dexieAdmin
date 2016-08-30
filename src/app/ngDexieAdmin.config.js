@@ -70,6 +70,7 @@ export class NgDexieAdminConfig {
           isCloseFriend:false,
           'contact.mail.prof':true
         },
+        displayEdit: 'simple',
         order: 2,
         noDelete: true,
         load: () => {return loadFirend()}

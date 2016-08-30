@@ -1,16 +1,29 @@
-<style>
 
-</style>
 <script type="text/ng-template" id="displayJson.html">
   <div class="modal-body">
-    <div ng-jsoneditor="editorLoaded"  ng-model="obj.data" options="options" style="height: 80vh;"></div>
+    <div ng-jsoneditor="editorLoaded"  ng-model="obj.data" options="options" style="height: 70vh;"></div>
   </div>
   <div class="modal-footer">
-    <button class="btn btn-danger" type="button" ng-click="del()">Delete</button>
+    <button ng-if="obj.dispalyDelete" class="btn btn-danger" type="button" ng-click="del()">Delete</button>
     <button class="btn btn-primary" type="button" ng-click="save()">Save</button>
     <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
 </div>
 </script>
+<script type="text/ng-template" id="displayJsonSimple.html">
+    <div ng-show="error!=null" class="alert alert-danger fade in">
+        <a ng-click="error=null"class="close" data-dismiss="alert">&times;</a>
+         {{error.message}}
+    </div>
+  <div class="modal-body">
+    <textarea  ng-model="obj.data" style="height: 70vh;" class="form-control"></textarea>
+  </div>
+  <div class="modal-footer">
+    <button ng-if="obj.dispalyDelete" class="btn btn-danger" type="button" ng-click="del()">Delete</button>
+    <button class="btn btn-primary" type="button" ng-click="save()">Save</button>
+    <button class="btn btn-warning" type="button" ng-click="cancel()">Cancel</button>
+  </div>
+</script>
+
   <div class="row">
       <div class="col-xs-3">
         <div class="panel panel-default">
@@ -72,9 +85,12 @@
         <div class="panel panel-default">
           <div class="panel-heading clearfix">
             {{dbManger.selectedTable.name}}
-            <div class="btn-group pull-right">
+            <div class="pull-right">
               <div ng-style="dbManger.nbDataToDelete()?{opacity:100}:{opacity:0}" ng-click="dbManger.deleteSelected($event, table)" class="btn  btn-default" title="Delete selected data">
                 {{dbManger.nbDataToDelete()}} <i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i>
+              </div>
+              <div ng-click="dbManger.addNewData($event, table)" class="btn  btn-default" title="Add nes data">
+                <i class="fa fa-plus-circle" aria-hidden="true"></i>
               </div>
             </div>
           </div>

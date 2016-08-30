@@ -36,6 +36,10 @@ export class DbManagerController {
     this.animate($event, 'fa-spin', this.dbManager.load(table));
   }
 
+  add(table, objet){
+    this.animate($event, 'faa-flash', this.dbManager.add(table, objet));
+  }
+
   hasActionLoad(table) {
     return this.dbManager.hasActionLoad(table);
   }
@@ -93,6 +97,7 @@ export class DbManagerController {
     this.animate($event, 'faa-flash', this.dbManager.dumpTable(table));
   }
 
+
   search(textSearch) {
     this.dbManager.search(textSearch, this.selectedTable).then((result) => {
       this.dataTable = result;
@@ -117,51 +122,80 @@ export class DbManagerController {
     this.dbManager.buildData(this.selectedTable).then((list) => this.dataTable = list).then(()=>this.$scope.$digest());
   }
 
-  displayRow(data) {
+  addNewData(){
+      this.displayRow({}, true)
+  }
+
+  displayRow(data, isNewValue) {
     var self = this;
-    this.$log.log(data);
+    if(!isNewValue) {
+      this.$log.log(data);
+    }
+    var tempalte = "displayJson.html";
+
+    var displaySimple = false;
+    console.log(this.dbManager.displayEditConfig(this.selectedTable.name));
+      if('simple' == this.dbManager.displayEditConfig(this.selectedTable.name)){
+      displaySimple = true;
+      tempalte = "displayJsonSimple.html";
+    }
     this.$uibModal.open({
-
-      controller: ['$scope', 'json','$uibModalInstance','$timeout', ($scope, json, $uibModalInstance, $timeout) => {
-
+      controller: ['$scope', 'objetData','$uibModalInstance','$timeout', ($scope, objetData, $uibModalInstance, $timeout) => {
+        var json = objetData;
         delete json.$$hashKey;
-        $scope.obj = {data: json};
+        if(displaySimple){
+          json = angular.toJson(objetData, true);
+        } else {
+          $scope.editorLoaded = function(jsonEditor){
+                jsonEditor.set(objetData);
+                if(!isNewValue){
+                  $timeout(()=>{jsonEditor.expandAll();},150);
+                }
+          };
+          $scope.options = {
+            "mode": (isNewValue)?'text':"tree",
+            "modes": [
+              "tree",
+              "text"
+            ],
+            "history": true
+          };
+        }
 
-        $scope.editorLoaded = function(jsonEditor){
-              jsonEditor.set(json);
-              $timeout(()=>{jsonEditor.expandAll();},150)
-        };
-        $scope.options = {
-          "mode": "tree",
-          "modes": [
-            "tree",
-            "text"
-          ],
-          "history": true
-        };
+        $scope.obj = {data: json, dispalyDelete: !isNewValue};
 
         $scope.del = () => {
-          this.dbManager.deleteObject(this.selectedTable, $scope.obj.data).then(()=>{
+          this.dbManager.deleteObject(this.selectedTable, objetData).then(()=>{
             self.displayData(self.selectedTableIndex);
             $uibModalInstance.close($scope.obj.data);
           });
-
         };
         $scope.save =  () => {
-          self.selectedTable.put($scope.obj.data).then(()=>{
-            self.displayData(self.selectedTableIndex);
-            $uibModalInstance.close($scope.obj.data);
-          });
+          $scope.error= null;
+          var objet = $scope.obj.data;
+          if(displaySimple){
+            try {
+                  objet = angular.fromJson(objet);
+                } catch (e) {
+                  $scope.error = e;
+                }
+          }
+          if(!$scope.error){
+            this.dbManager.save(self.selectedTable,objet).then(()=>{
+              self.displayData(self.selectedTableIndex);
+              $uibModalInstance.close($scope.obj.data);
+            });
+          }
         };
         $scope.cancel = () => {
           $uibModalInstance.dismiss('cancel');
         };
       }],
-      templateUrl: 'displayJson.html',
+      templateUrl: tempalte,
       controllerAs: 'jsonCtrl',
       size: 'lg',
       resolve: {
-        json: () => data //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
+        objetData: () => data //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
       }
     });
   }

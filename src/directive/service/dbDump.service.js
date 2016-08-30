@@ -38,7 +38,7 @@ export class DbDump {
             self = this,
             rn = this.rn;
         var promise = new Promise((resolve)=>{
-        db.open().then(function () {
+            db.open().then(function () {
               let dump = `var db = new Dexie('${db.name}') ${rn} db.version(${db.verno}).stores({ ${rn}`;
               let defs = self.createTblesDef();
               dump = dump+Object.keys(defs).map(key => {

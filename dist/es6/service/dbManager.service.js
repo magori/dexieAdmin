@@ -72,6 +72,15 @@ var DbManagerService = function () {
       return this.resolveConfigType('columns')[tableName];
     }
   }, {
+    key: 'displayEditConfig',
+    value: function displayEditConfig(tableName) {
+      var conf = this.resolveConfigType('displayEdit');
+      if (conf) {
+        return conf[tableName];
+      }
+      return null;
+    }
+  }, {
     key: 'resolveColumns',
     value: function resolveColumns(table) {
       var columns = this.columnsToDisplay(table.name);
@@ -172,6 +181,22 @@ var DbManagerService = function () {
       }));
     }
   }, {
+    key: 'add',
+    value: function add(table, objet) {
+      return table.put(objet);
+    }
+  }, {
+    key: 'save',
+    value: function save(table, objet) {
+      return table.put(objet);
+    }
+  }, {
+    key: 'deleteObject',
+    value: function deleteObject(table, object) {
+      var pk = this.primaryKeyName(table);
+      return table.delete(object[pk]);
+    }
+  }, {
     key: 'delete',
     value: function _delete(table, ids) {
       var _this3 = this;
@@ -187,12 +212,6 @@ var DbManagerService = function () {
       }).then(function () {
         return _this3.onRefresh();
       });
-    }
-  }, {
-    key: 'deleteObject',
-    value: function deleteObject(table, object) {
-      var pk = this.primaryKeyName(table);
-      return table.delete(object[pk]);
     }
   }, {
     key: 'loadAll',
@@ -290,11 +309,6 @@ var DbManagerService = function () {
         }
       };
       f();
-      // var t = this.tables.map((table) => {
-      //   return
-      //   this.countTupleTable(table);
-      // });
-      //Promise.all(t).then(()=>{this.onRefresh()});
     }
   }, {
     key: 'countTupleTable',
@@ -367,7 +381,7 @@ var DbManagerService = function () {
       });
       var url = window.URL.createObjectURL(data);
       var a = document.createElement('a');
-      a.style = "display: none";
+      a.style.display = "none";
       a.href = url;
       a.download = "dump_" + new Date().getTime() + ".txt";
       document.body.appendChild(a);
