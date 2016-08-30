@@ -33,8 +33,8 @@ var app = angular.module('exampleApp', ['ng.dexieadmin'])
             return {
               getDb : function () {
                 return db;
-              }
-            };
+              };
+            }
           });
 ```    
 
