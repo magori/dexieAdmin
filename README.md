@@ -4,7 +4,9 @@ You can read, delete, edit, dump, and search data in tables.
 
 The interface is made with [Bootstrap 3](http://getbootstrap.com/), [UI Bootstrap](https://angular-ui.github.io/bootstrap) and [fontawesome](http://fontawesome.io)
 
-You can try the [demo on plunker](http://embed.plnkr.co/obhiwZ/)
+You can try the [demo on plunker](http://embed.plnkr.co/obhiwZ/).
+
+By default only the index are display but you can display other data by configurations(TODO).
 
 Requirements
 ----------------
