@@ -125,7 +125,7 @@
                   </tr>
                 </thead>
                 <tbody>
-                  <tr ng-repeat="data in dbManger.dataTable | limitTo:150" ng-click="dbManger.displayRow(data)">
+                  <tr ng-repeat="data in dbManger.dataTable | limitTo:150" ng-click="dbManger.displayRow(data[dbManger.selectedTable.schema.primKey.name])">
                     <td><input type="checkbox" ng-click="$event.stopPropagation()" ng-model="dbManger.toDelete[data[dbManger.selectedTable.schema.primKey.name]]" name="del" d /> </td>
                     <td>{{data[dbManger.selectedTable.schema.primKey.name]}}
                     <td ng-repeat="indexe in dbManger.columns">{{data[indexe]}}</td>

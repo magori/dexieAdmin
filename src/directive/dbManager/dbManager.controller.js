@@ -126,77 +126,79 @@ export class DbManagerController {
       this.displayRow({}, true)
   }
 
-  displayRow(data, isNewValue) {
-    var self = this;
-    if(!isNewValue) {
-      this.$log.log(data);
-    }
-    var tempalte = "displayJson.html";
-
-    var displaySimple = false;
-    console.log(this.dbManager.displayEditConfig(this.selectedTable.name));
-      if('simple' == this.dbManager.displayEditConfig(this.selectedTable.name)){
-      displaySimple = true;
-      tempalte = "displayJsonSimple.html";
-    }
-    this.$uibModal.open({
-      controller: ['$scope', 'objetData','$uibModalInstance','$timeout', ($scope, objetData, $uibModalInstance, $timeout) => {
-        var json = objetData;
-        delete json.$$hashKey;
-        if(displaySimple){
-          json = angular.toJson(objetData, true);
-        } else {
-          $scope.editorLoaded = function(jsonEditor){
-                jsonEditor.set(objetData);
-                if(!isNewValue){
-                  $timeout(()=>{jsonEditor.expandAll();},150);
-                }
-          };
-          $scope.options = {
-            "mode": (isNewValue)?'text':"tree",
-            "modes": [
-              "tree",
-              "text"
-            ],
-            "history": true
-          };
+  displayRow(id, isNewValue) {
+    this.selectedTable.get(id).then((data) => {
+        var self = this;
+        if(!isNewValue) {
+            this.$log.log(data);
         }
+        var tempalte = "displayJson.html";
 
-        $scope.obj = {data: json, dispalyDelete: !isNewValue};
-
-        $scope.del = () => {
-          this.dbManager.deleteObject(this.selectedTable, objetData).then(()=>{
-            self.displayData(self.selectedTableIndex);
-            $uibModalInstance.close($scope.obj.data);
-          });
-        };
-        $scope.save =  () => {
-          $scope.error= null;
-          var objet = $scope.obj.data;
-          if(displaySimple){
-            try {
-                  objet = angular.fromJson(objet);
-                } catch (e) {
-                  $scope.error = e;
+        var displaySimple = false;
+        console.log(this.dbManager.displayEditConfig(this.selectedTable.name));
+        if('simple' == this.dbManager.displayEditConfig(this.selectedTable.name)){
+            displaySimple = true;
+            tempalte = "displayJsonSimple.html";
+        }
+        this.$uibModal.open({
+            controller: ['$scope', 'objetData','$uibModalInstance','$timeout', ($scope, objetData, $uibModalInstance, $timeout) => {
+                var json = objetData;
+                delete json.$$hashKey;
+                if(displaySimple){
+                    json = angular.toJson(objetData, true);
+                } else {
+                    $scope.editorLoaded = function(jsonEditor){
+                        jsonEditor.set(objetData);
+                        if(!isNewValue){
+                            $timeout(()=>{jsonEditor.expandAll();},150);
+                        }
+                    };
+                    $scope.options = {
+                        "mode": (isNewValue)?'text':"tree",
+                        "modes": [
+                            "tree",
+                            "text"
+                        ],
+                        "history": true
+                    };
                 }
-          }
-          if(!$scope.error){
-            this.dbManager.save(self.selectedTable,objet).then(()=>{
-              self.displayData(self.selectedTableIndex);
-              $uibModalInstance.close($scope.obj.data);
-            });
-          }
-        };
-        $scope.cancel = () => {
-          $uibModalInstance.dismiss('cancel');
-        };
-      }],
-      templateUrl: tempalte,
-      controllerAs: 'jsonCtrl',
-      size: 'lg',
-      resolve: {
-        objetData: () => data //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
-      }
+
+                $scope.obj = {data: json, dispalyDelete: !isNewValue};
+
+                $scope.del = () => {
+                    this.dbManager.deleteObject(this.selectedTable, objetData).then(()=>{
+                        self.displayData(self.selectedTableIndex);
+                        $uibModalInstance.close($scope.obj.data);
+                    });
+                };
+                $scope.save =  () => {
+                    $scope.error= null;
+                    var objet = $scope.obj.data;
+                    if(displaySimple){
+                        try {
+                            objet = angular.fromJson(objet);
+                        } catch (e) {
+                            $scope.error = e;
+                        }
+                    }
+                    if(!$scope.error){
+                        this.dbManager.save(self.selectedTable,objet).then(()=>{
+                            self.displayData(self.selectedTableIndex);
+                            $uibModalInstance.close($scope.obj.data);
+                        });
+                    }
+                };
+                $scope.cancel = () => {
+                    $uibModalInstance.dismiss('cancel');
+                };
+            }],
+            templateUrl: tempalte,
+            controllerAs: 'jsonCtrl',
+            size: 'lg',
+            resolve: {
+                objetData: () => data //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
+            }
+        });
     });
   }
 }
