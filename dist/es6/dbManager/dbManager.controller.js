@@ -183,80 +183,82 @@ var DbManagerController = exports.DbManagerController = function () {
     }
   }, {
     key: "displayRow",
-    value: function displayRow(data, isNewValue) {
+    value: function displayRow(id, isNewValue) {
       var _this7 = this;
 
-      var self = this;
-      if (!isNewValue) {
-        this.$log.log(data);
-      }
-      var tempalte = "displayJson.html";
+      this.selectedTable.get(id).then(function (data) {
+        var self = _this7;
+        if (!isNewValue) {
+          _this7.$log.log(data);
+        }
+        var tempalte = "displayJson.html";
 
-      var displaySimple = false;
-      console.log(this.dbManager.displayEditConfig(this.selectedTable.name));
-      if ('simple' == this.dbManager.displayEditConfig(this.selectedTable.name)) {
-        displaySimple = true;
-        tempalte = "displayJsonSimple.html";
-      }
-      this.$uibModal.open({
-        controller: ['$scope', 'objetData', '$uibModalInstance', '$timeout', function ($scope, objetData, $uibModalInstance, $timeout) {
-          var json = objetData;
-          delete json.$$hashKey;
-          if (displaySimple) {
-            json = angular.toJson(objetData, true);
-          } else {
-            $scope.editorLoaded = function (jsonEditor) {
-              jsonEditor.set(objetData);
-              if (!isNewValue) {
-                $timeout(function () {
-                  jsonEditor.expandAll();
-                }, 150);
-              }
-            };
-            $scope.options = {
-              "mode": isNewValue ? 'text' : "tree",
-              "modes": ["tree", "text"],
-              "history": true
-            };
-          }
-
-          $scope.obj = { data: json, dispalyDelete: !isNewValue };
-
-          $scope.del = function () {
-            _this7.dbManager.deleteObject(_this7.selectedTable, objetData).then(function () {
-              self.displayData(self.selectedTableIndex);
-              $uibModalInstance.close($scope.obj.data);
-            });
-          };
-          $scope.save = function () {
-            $scope.error = null;
-            var objet = $scope.obj.data;
+        var displaySimple = false;
+        console.log(_this7.dbManager.displayEditConfig(_this7.selectedTable.name));
+        if ('simple' == _this7.dbManager.displayEditConfig(_this7.selectedTable.name)) {
+          displaySimple = true;
+          tempalte = "displayJsonSimple.html";
+        }
+        _this7.$uibModal.open({
+          controller: ['$scope', 'objetData', '$uibModalInstance', '$timeout', function ($scope, objetData, $uibModalInstance, $timeout) {
+            var json = objetData;
+            delete json.$$hashKey;
             if (displaySimple) {
-              try {
-                objet = angular.fromJson(objet);
-              } catch (e) {
-                $scope.error = e;
-              }
+              json = angular.toJson(objetData, true);
+            } else {
+              $scope.editorLoaded = function (jsonEditor) {
+                jsonEditor.set(objetData);
+                if (!isNewValue) {
+                  $timeout(function () {
+                    jsonEditor.expandAll();
+                  }, 150);
+                }
+              };
+              $scope.options = {
+                "mode": isNewValue ? 'text' : "tree",
+                "modes": ["tree", "text"],
+                "history": true
+              };
             }
-            if (!$scope.error) {
-              _this7.dbManager.save(self.selectedTable, objet).then(function () {
+
+            $scope.obj = { data: json, dispalyDelete: !isNewValue };
+
+            $scope.del = function () {
+              _this7.dbManager.deleteObject(_this7.selectedTable, objetData).then(function () {
                 self.displayData(self.selectedTableIndex);
                 $uibModalInstance.close($scope.obj.data);
               });
-            }
-          };
-          $scope.cancel = function () {
-            $uibModalInstance.dismiss('cancel');
-          };
-        }],
-        templateUrl: tempalte,
-        controllerAs: 'jsonCtrl',
-        size: 'lg',
-        resolve: {
-          objetData: function objetData() {
-            return data;
-          } //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
-        }
+            };
+            $scope.save = function () {
+              $scope.error = null;
+              var objet = $scope.obj.data;
+              if (displaySimple) {
+                try {
+                  objet = angular.fromJson(objet);
+                } catch (e) {
+                  $scope.error = e;
+                }
+              }
+              if (!$scope.error) {
+                _this7.dbManager.save(self.selectedTable, objet).then(function () {
+                  self.displayData(self.selectedTableIndex);
+                  $uibModalInstance.close($scope.obj.data);
+                });
+              }
+            };
+            $scope.cancel = function () {
+              $uibModalInstance.dismiss('cancel');
+            };
+          }],
+          templateUrl: tempalte,
+          controllerAs: 'jsonCtrl',
+          size: 'lg',
+          resolve: {
+            objetData: function objetData() {
+              return data;
+            } //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
+          }
+        });
       });
     }
   }]);
