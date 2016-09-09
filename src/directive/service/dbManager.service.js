@@ -6,9 +6,9 @@ export class DbManagerService {
   constructor(ngDexieAdminConfig) {
     'ngInject';
 
-    this.config(ngDexieAdminConfig)
+    //this.config(ngDexieAdminConfig)
     this.previsouSearch = "";
-    this.countTupleForEachTable();
+    //this.countTupleForEachTable();
   }
 
   config(config) {
@@ -22,7 +22,9 @@ export class DbManagerService {
     var actionsLoad = this.resolveConfigType('load');
     this.actionsLoad = actionsLoad;
     this.context = config.context;
-    this.onNewDb = config.onNewDb();
+    if(config.onNewDb) {
+      this.onNewDb = config.onNewDb();
+    }
   }
 
   getTables(){
@@ -50,6 +52,14 @@ export class DbManagerService {
 
   displayEditConfig(tableName) {
     var conf = this.resolveConfigType('displayEdit');
+    if(conf){
+      return conf[tableName];
+    }
+    return null;
+  }
+
+  fieldsConfig(tableName){
+    var conf = this.resolveConfigType('fields');
     if(conf){
       return conf[tableName];
     }
@@ -107,12 +117,14 @@ export class DbManagerService {
 
   resolveConfigType(type) {
     var config = {};
-    Object.keys(this.config.tablesConfig()).forEach((table) => {
-      var tableConfig = this.config.tablesConfig()[table];
-      if (tableConfig && tableConfig[type] != undefined) {
-        config[table] = tableConfig[type];
-      }
-    });
+    if(this.config.tablesConfig){
+      Object.keys(this.config.tablesConfig()).forEach((table) => {
+        var tableConfig = this.config.tablesConfig()[table];
+        if (tableConfig && tableConfig[type] != undefined) {
+          config[table] = tableConfig[type];
+        }
+      });
+    }
     return config;
   }
 
@@ -303,4 +315,54 @@ export class DbManagerService {
     }
     return values.toUpperCase();
   }
+
+
+  tableParser(obj, path){
+    var s = path.replace(/^\./, '');           // strip a leading dot
+    var a = s.split('.');
+    var currentPaht="";
+    var t = [];
+    var o = obj;
+    console.log(a);
+    for (var i = 0, n = a.length; i < n; ++i) {
+        var k = a[i];
+        currentPaht = currentPaht+(currentPaht?".":"")+k;
+        console.log(i,k,o);
+        //"t[].child[].age")
+        if (k in o) {
+            o = o[k];
+        } else if(k.indexOf('[]')){
+          k = k.replace('[]','');
+           t.push(o[k].length)
+            o = o[k][0];
+           for(var j=0; j<o.length; j++){
+             //console.log(o[i]);
+             this.tableParser(o[i],currentPaht)
+           }
+        }
+     }
+    console.log(t);
+    return t;
+  }
+  // deletePropertyByPath(object, path){
+  //   var s = path;
+  //   // s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
+  //    s = s.replace(/^\./, '');           // strip a leading dot
+  //    var a = s.split('.');
+  //    var o = object;
+  //    var nbElments = []
+  //    for (var i = 0, n = a.length; i < n; ++i) {
+  //        var k = a[i];
+  //        if (k in o) {
+  //            o = o[k];
+  //        } else if(k == '[]'){
+  //          nbElments.push(o.length)
+  //        }
+  //     }
+  //     return
+  //
+  //     console.log(nbElments);
+  //     //console.log("data."+key,eval( "delete data."+key));
+  //     console.log(key, o);
+  // }
 }

@@ -28,7 +28,7 @@ function listFiles() {
     };
   });
   files.push({
-    pattern: path.join(conf.paths.src, '/assets/**/*'),
+    pattern: path.join(conf.paths.src, '/directive/**/*'),
     included: false,
     served: true,
     watched: false

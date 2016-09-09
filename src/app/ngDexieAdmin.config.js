@@ -9,13 +9,13 @@ export class NgDexieAdminConfig {
       friends: "++id, name, age, isCloseFriend, contact.phone",
       notes: "++id, title, date, *items",
       noLoadAction: "++id",
-      budget:"++id, titre"
+      budget:"&id, titre"
     });
   }
 
-  onNewDb() {
-    return (db) => { this.db = db };
-  }
+  // onNewDb() {
+  //   return (db) => { this.db = db };
+  // }
 
   getDb() {
     return this.db;
@@ -69,6 +69,9 @@ export class NgDexieAdminConfig {
           time: false,
           isCloseFriend:false,
           'contact.mail.prof':true
+        },
+        fields:{
+            'contact2.phone': false
         },
         displayEdit: 'simple',
         order: 2,

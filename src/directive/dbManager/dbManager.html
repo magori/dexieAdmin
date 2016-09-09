@@ -74,8 +74,10 @@
                   <i class="fa fa-key" aria-hidden="true"></i> {{table.schema.primKey.name}} : {{table.schema.primKey.auto}}
                   <p class="list-group-item-text">
                   </p>
+                  <p>
                   index:
-                  <span ng-repeat="indexe in table.schema.indexes">{{indexe.src}}, </span>
+                  <span ng-repeat="indexe in table.schema.indexes">{{indexe.src}}&nbsp;</span>
+                </p>
               </p>
             </div>
           </div>
