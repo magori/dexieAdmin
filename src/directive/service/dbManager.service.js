@@ -218,7 +218,11 @@ export class DbManagerService {
       });
   }
 
-  dump() {
+  dumpAsSting(tablesToExclude) {
+    return this.dbDump.dump(tablesToExclude);
+  }
+
+  dump(tablesToExclude) {
     return this.dbDump.dump().then(dump => this.createFileAndDowload(dump));
   }
 

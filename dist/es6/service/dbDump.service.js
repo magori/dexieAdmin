@@ -24,7 +24,7 @@ var DbDump = function () {
                 this.db = _config.db;
                 this.dbName = this.db.name + "";
                 this.tables = this.db.tables;
-                this.tableDef = this.createTblesDef();
+                this.tableDef = this.createTblesDef(this.tables);
             }
         }
     }, {
@@ -40,9 +40,9 @@ var DbDump = function () {
         }
     }, {
         key: "createTblesDef",
-        value: function createTblesDef() {
+        value: function createTblesDef(tables) {
             var defTables = {};
-            this.db.tables.map(function (table) {
+            tables.map(function (table) {
                 var primKeyAndIndexes = [table.schema.primKey].concat(table.schema.indexes);
                 var schemaSyntax = primKeyAndIndexes.map(function (index) {
                     return index.src;
@@ -56,20 +56,25 @@ var DbDump = function () {
         value: function dump() {
             var _this2 = this;
 
+            var tablesToExclude = arguments.length <= 0 || arguments[0] === undefined ? "" : arguments[0];
+
             var db = this.db,
                 self = this,
                 rn = this.rn;
+            var tablesFiltred = db.tables.filter(function (table) {
+                return !tablesToExclude.includes(table.name);
+            });
             var promise = new Promise(function (resolve) {
                 db.open().then(function () {
                     var dump = "var db = new Dexie('" + db.name + "') " + rn + " db.version(" + db.verno + ").stores({ " + rn;
-                    var defs = self.createTblesDef();
+                    var defs = self.createTblesDef(tablesFiltred);
                     dump = dump + Object.keys(defs).map(function (key) {
                         var schemaSyntax = defs[key];
                         return "  " + key + ": '" + schemaSyntax + "'";
                     }).join("," + rn);
                     return "" + rn + dump + "});" + rn;
                 }).then(function (dump) {
-                    var p = db.tables.map(function (table) {
+                    var p = tablesFiltred.map(function (table) {
                         return self.dumpTable(table);
                     });
                     Promise.all(p).then(function (dumpDataTable) {

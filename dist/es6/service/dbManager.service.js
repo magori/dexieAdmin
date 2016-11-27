@@ -287,8 +287,13 @@ var DbManagerService = function () {
       });
     }
   }, {
+    key: 'dumpAsSting',
+    value: function dumpAsSting(tablesToExclude) {
+      return this.dbDump.dump(tablesToExclude);
+    }
+  }, {
     key: 'dump',
-    value: function dump() {
+    value: function dump(tablesToExclude) {
       var _this7 = this;
 
       return this.dbDump.dump().then(function (dump) {
