@@ -39,7 +39,9 @@ var DbManagerService = function () {
       var actionsLoad = this.resolveConfigType('load');
       this.actionsLoad = actionsLoad;
       this.context = _config.context;
-      this.onNewDb = _config.onNewDb();
+      if (_config.onNewDb) {
+        this.onNewDb = _config.onNewDb();
+      }
     }
   }, {
     key: 'getTables',
@@ -75,6 +77,15 @@ var DbManagerService = function () {
     key: 'displayEditConfig',
     value: function displayEditConfig(tableName) {
       var conf = this.resolveConfigType('displayEdit');
+      if (conf) {
+        return conf[tableName];
+      }
+      return null;
+    }
+  }, {
+    key: 'fieldsConfig',
+    value: function fieldsConfig(tableName) {
+      var conf = this.resolveConfigType('fields');
       if (conf) {
         return conf[tableName];
       }
@@ -139,12 +150,14 @@ var DbManagerService = function () {
       var _this = this;
 
       var config = {};
-      Object.keys(this.config.tablesConfig()).forEach(function (table) {
-        var tableConfig = _this.config.tablesConfig()[table];
-        if (tableConfig && tableConfig[type] != undefined) {
-          config[table] = tableConfig[type];
-        }
-      });
+      if (this.config.tablesConfig) {
+        Object.keys(this.config.tablesConfig()).forEach(function (table) {
+          var tableConfig = _this.config.tablesConfig()[table];
+          if (tableConfig && tableConfig[type] != undefined) {
+            config[table] = tableConfig[type];
+          }
+        });
+      }
       return config;
     }
   }, {
@@ -407,6 +420,32 @@ var DbManagerService = function () {
         }
       }
       return values.toUpperCase();
+    }
+  }, {
+    key: 'tableParser',
+    value: function tableParser(obj, path) {
+      var s = path.replace(/^\./, ''); // strip a leading dot
+      var a = s.split('.');
+      var currentPaht = "";
+      var t = [];
+      var o = obj;
+      for (var i = 0, n = a.length; i < n; ++i) {
+        var k = a[i];
+        currentPaht = currentPaht + (currentPaht ? "." : "") + k;
+        //"t[].child[].age")
+        if (k in o) {
+          o = o[k];
+        } else if (k.indexOf('[]')) {
+          k = k.replace('[]', '');
+          t.push(o[k].length);
+          o = o[k][0];
+          for (var j = 0; j < o.length; j++) {
+            //console.log(o[i]);
+            this.tableParser(o[i], currentPaht);
+          }
+        }
+      }
+      return t;
     }
   }]);
 

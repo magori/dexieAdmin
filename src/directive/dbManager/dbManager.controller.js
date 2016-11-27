@@ -135,7 +135,6 @@ export class DbManagerController {
         var tempalte = "displayJson.html";
 
         var displaySimple = false;
-        console.log(this.dbManager.displayEditConfig(this.selectedTable.name));
         if('simple' == this.dbManager.displayEditConfig(this.selectedTable.name)){
             displaySimple = true;
             tempalte = "displayJsonSimple.html";
@@ -196,7 +195,7 @@ export class DbManagerController {
             controllerAs: 'jsonCtrl',
             size: 'lg',
             resolve: {
-                objetData: () => data //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
+                objetData: () => data
             }
         });
     });

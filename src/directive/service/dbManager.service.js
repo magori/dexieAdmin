@@ -5,10 +5,9 @@ export class DbManagerService {
 
   constructor(ngDexieAdminConfig) {
     'ngInject';
-
-    //this.config(ngDexieAdminConfig)
+    this.config(ngDexieAdminConfig)
     this.previsouSearch = "";
-    //this.countTupleForEachTable();
+    this.countTupleForEachTable();
   }
 
   config(config) {
@@ -323,11 +322,9 @@ export class DbManagerService {
     var currentPaht="";
     var t = [];
     var o = obj;
-    console.log(a);
     for (var i = 0, n = a.length; i < n; ++i) {
         var k = a[i];
         currentPaht = currentPaht+(currentPaht?".":"")+k;
-        console.log(i,k,o);
         //"t[].child[].age")
         if (k in o) {
             o = o[k];
@@ -341,28 +338,6 @@ export class DbManagerService {
            }
         }
      }
-    console.log(t);
     return t;
   }
-  // deletePropertyByPath(object, path){
-  //   var s = path;
-  //   // s = s.replace(/\[(\w+)\]/g, '.$1'); // convert indexes to properties
-  //    s = s.replace(/^\./, '');           // strip a leading dot
-  //    var a = s.split('.');
-  //    var o = object;
-  //    var nbElments = []
-  //    for (var i = 0, n = a.length; i < n; ++i) {
-  //        var k = a[i];
-  //        if (k in o) {
-  //            o = o[k];
-  //        } else if(k == '[]'){
-  //          nbElments.push(o.length)
-  //        }
-  //     }
-  //     return
-  //
-  //     console.log(nbElments);
-  //     //console.log("data."+key,eval( "delete data."+key));
-  //     console.log(key, o);
-  // }
 }

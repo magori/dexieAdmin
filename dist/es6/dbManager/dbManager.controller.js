@@ -194,7 +194,6 @@ var DbManagerController = exports.DbManagerController = function () {
         var tempalte = "displayJson.html";
 
         var displaySimple = false;
-        console.log(_this7.dbManager.displayEditConfig(_this7.selectedTable.name));
         if ('simple' == _this7.dbManager.displayEditConfig(_this7.selectedTable.name)) {
           displaySimple = true;
           tempalte = "displayJsonSimple.html";
@@ -256,7 +255,7 @@ var DbManagerController = exports.DbManagerController = function () {
           resolve: {
             objetData: function objetData() {
               return data;
-            } //JSON.stringify(data, (k, v) => (k != '$$hashKey') ? v : undefined, 2).replace(/\{/g, "").replace(/\}/g, "").replace(/\s\s+\n/g, "")
+            }
           }
         });
       });
