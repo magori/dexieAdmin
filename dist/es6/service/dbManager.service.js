@@ -23,7 +23,7 @@ var DbManagerService = function () {
 
     this.config(ngDexieAdminConfig);
     this.previsouSearch = "";
-    this.countTupleForEachTable();
+    this.onRefresh = function () {};
   }
 
   _createClass(DbManagerService, [{
@@ -161,8 +161,8 @@ var DbManagerService = function () {
       return config;
     }
   }, {
-    key: 'onRefresh',
-    value: function onRefresh(call) {
+    key: 'configOnRefresh',
+    value: function configOnRefresh(call) {
       this.onRefresh = call;
     }
   }, {

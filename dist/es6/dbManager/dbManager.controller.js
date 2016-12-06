@@ -9,8 +9,8 @@ var _createClass = function () { function defineProperties(target, props) { for 
 function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
 var DbManagerController = exports.DbManagerController = function () {
-  DbManagerController.$inject = ["$scope", "$log", "$uibModal", "$timeout", "dbManagerService"];
-  function DbManagerController($scope, $log, $uibModal, $timeout, dbManagerService) {
+  DbManagerController.$inject = ["$scope", "$log", "$uibModal", "$timeout", "$route", "dbManagerService"];
+  function DbManagerController($scope, $log, $uibModal, $timeout, $route, dbManagerService) {
     'ngInject';
 
     var _this = this;
@@ -20,15 +20,17 @@ var DbManagerController = exports.DbManagerController = function () {
     this.$timeout = $timeout;
     this.$log = $log;
     this.$scope = $scope;
+    this.$route = $route;
     this.$uibModal = $uibModal;
     this.dbManager = dbManagerService;
     this.tables = this.dbManager.getTables();
     this.selectedTable = this.tables[0];
     this.selectedTableIndex = 0;
-    this.dbManager.onRefresh(function () {
+    this.dbManager.configOnRefresh(function () {
       _this.tables = _this.dbManager.getTables();
       _this.displayData(_this.selectedTableIndex);
     });
+    dbManagerService.countTupleForEachTable();
     this.toDelete = {};
   }
 
@@ -132,6 +134,35 @@ var DbManagerController = exports.DbManagerController = function () {
       this.animate($event, 'faa-flash', this.dbManager.dump());
     }
   }, {
+    key: "dumpSizeInKo",
+    value: function dumpSizeInKo() {
+      if (this.fileDump) {
+        return Math.ceil(this.fileDump.size / 1024);
+      }
+    }
+  }, {
+    key: "loadDump",
+    value: function loadDump() {
+      var _this4 = this;
+
+      var reader = new FileReader();
+      reader.onload = function (loadEvent) {
+        _this4.dbManager.drop().then(function () {
+          var db;
+          eval(loadEvent.target.result);
+          delete _this4.fileDump;
+          alert("Dump loaded, reload the application");
+          //this.$route.reload();
+        });
+      };
+      reader.readAsText(this.fileDump);
+    }
+  }, {
+    key: "cancelDump",
+    value: function cancelDump() {
+      delete this.fileDump;
+    }
+  }, {
     key: "save",
     value: function save($event, table) {
       this.animate($event, 'faa-flash', this.dbManager.dumpTable(table));
@@ -139,20 +170,20 @@ var DbManagerController = exports.DbManagerController = function () {
   }, {
     key: "search",
     value: function search(textSearch) {
-      var _this4 = this;
+      var _this5 = this;
 
       this.dbManager.search(textSearch, this.selectedTable).then(function (result) {
-        _this4.dataTable = result;
-        _this4.$scope.$digest();
+        _this5.dataTable = result;
+        _this5.$scope.$digest();
       });
     }
   }, {
     key: "checkAll",
     value: function checkAll() {
-      var _this5 = this;
+      var _this6 = this;
 
       this.dataTable.forEach(function (data) {
-        return _this5.toDelete[data[_this5.dbManager.primaryKeyName(_this5.selectedTable)]] = _this5.checkAllForDelete;
+        return _this6.toDelete[data[_this6.dbManager.primaryKeyName(_this6.selectedTable)]] = _this6.checkAllForDelete;
       });
     }
   }, {
@@ -163,7 +194,7 @@ var DbManagerController = exports.DbManagerController = function () {
   }, {
     key: "displayData",
     value: function displayData(index) {
-      var _this6 = this;
+      var _this7 = this;
 
       this.checkAllForDelete = false;
       this.toDelete = {};
@@ -171,93 +202,99 @@ var DbManagerController = exports.DbManagerController = function () {
       this.selectedTable = this.tables[index];
       this.columns = this.dbManager.resolveColumns(this.selectedTable);
       this.dbManager.buildData(this.selectedTable).then(function (list) {
-        return _this6.dataTable = list;
+        return _this7.dataTable = list;
       }).then(function () {
-        return _this6.$scope.$digest();
+        return _this7.$scope.$digest();
       });
     }
   }, {
     key: "addNewData",
     value: function addNewData() {
-      this.displayRow({}, true);
+      this.displayModal({}, true);
+    }
+  }, {
+    key: "displayModal",
+    value: function displayModal(data, isNewValue) {
+      var _this8 = this;
+
+      var tempalte = "displayJson.html";
+      var displaySimple = false;
+      if ('simple' == this.dbManager.displayEditConfig(this.selectedTable.name)) {
+        displaySimple = true;
+        tempalte = "displayJsonSimple.html";
+      }
+      this.$uibModal.open({
+        controller: ['$scope', 'objetData', '$uibModalInstance', '$timeout', function ($scope, objetData, $uibModalInstance, $timeout) {
+          var json = objetData;
+          delete json.$$hashKey;
+          if (displaySimple) {
+            json = angular.toJson(objetData, true);
+          } else {
+            $scope.editorLoaded = function (jsonEditor) {
+              jsonEditor.set(objetData);
+              if (!isNewValue) {
+                $timeout(function () {
+                  jsonEditor.expandAll();
+                }, 150);
+              }
+            };
+            $scope.options = {
+              "mode": isNewValue ? 'text' : "tree",
+              "modes": ["tree", "text"],
+              "history": true
+            };
+          }
+
+          $scope.obj = { data: json, dispalyDelete: !isNewValue };
+
+          $scope.del = function () {
+            _this8.dbManager.deleteObject(_this8.selectedTable, objetData).then(function () {
+              _this8.selectedTable.nbRow = _this8.selectedTable.nbRow - 1;
+              _this8.displayData(_this8.selectedTableIndex);
+              $uibModalInstance.close($scope.obj.data);
+            });
+          };
+          $scope.save = function () {
+            $scope.error = null;
+            var objet = $scope.obj.data;
+            if (displaySimple) {
+              try {
+                objet = angular.fromJson(objet);
+              } catch (e) {
+                $scope.error = e;
+              }
+            }
+            if (!$scope.error) {
+              if (isNewValue) {
+                _this8.selectedTable.nbRow = _this8.selectedTable.nbRow + 1;
+              }
+              _this8.dbManager.save(_this8.selectedTable, objet).then(function () {
+                _this8.displayData(_this8.selectedTableIndex);
+                $uibModalInstance.close($scope.obj.data);
+              });
+            }
+          };
+          $scope.cancel = function () {
+            $uibModalInstance.dismiss('cancel');
+          };
+        }],
+        templateUrl: tempalte,
+        controllerAs: 'jsonCtrl',
+        size: 'lg',
+        resolve: {
+          objetData: function objetData() {
+            return data;
+          }
+        }
+      });
     }
   }, {
     key: "displayRow",
-    value: function displayRow(id, isNewValue) {
-      var _this7 = this;
+    value: function displayRow(id) {
+      var _this9 = this;
 
       this.selectedTable.get(id).then(function (data) {
-        var self = _this7;
-        if (!isNewValue) {
-          _this7.$log.log(data);
-        }
-        var tempalte = "displayJson.html";
-
-        var displaySimple = false;
-        if ('simple' == _this7.dbManager.displayEditConfig(_this7.selectedTable.name)) {
-          displaySimple = true;
-          tempalte = "displayJsonSimple.html";
-        }
-        _this7.$uibModal.open({
-          controller: ['$scope', 'objetData', '$uibModalInstance', '$timeout', function ($scope, objetData, $uibModalInstance, $timeout) {
-            var json = objetData;
-            delete json.$$hashKey;
-            if (displaySimple) {
-              json = angular.toJson(objetData, true);
-            } else {
-              $scope.editorLoaded = function (jsonEditor) {
-                jsonEditor.set(objetData);
-                if (!isNewValue) {
-                  $timeout(function () {
-                    jsonEditor.expandAll();
-                  }, 150);
-                }
-              };
-              $scope.options = {
-                "mode": isNewValue ? 'text' : "tree",
-                "modes": ["tree", "text"],
-                "history": true
-              };
-            }
-
-            $scope.obj = { data: json, dispalyDelete: !isNewValue };
-
-            $scope.del = function () {
-              _this7.dbManager.deleteObject(_this7.selectedTable, objetData).then(function () {
-                self.displayData(self.selectedTableIndex);
-                $uibModalInstance.close($scope.obj.data);
-              });
-            };
-            $scope.save = function () {
-              $scope.error = null;
-              var objet = $scope.obj.data;
-              if (displaySimple) {
-                try {
-                  objet = angular.fromJson(objet);
-                } catch (e) {
-                  $scope.error = e;
-                }
-              }
-              if (!$scope.error) {
-                _this7.dbManager.save(self.selectedTable, objet).then(function () {
-                  self.displayData(self.selectedTableIndex);
-                  $uibModalInstance.close($scope.obj.data);
-                });
-              }
-            };
-            $scope.cancel = function () {
-              $uibModalInstance.dismiss('cancel');
-            };
-          }],
-          templateUrl: tempalte,
-          controllerAs: 'jsonCtrl',
-          size: 'lg',
-          resolve: {
-            objetData: function objetData() {
-              return data;
-            }
-          }
-        });
+        _this9.displayModal(data);
       });
     }
   }]);

@@ -91,7 +91,19 @@
               <div ng-style="dbManger.nbDataToDelete()?{opacity:100}:{opacity:0}" ng-click="dbManger.deleteSelected($event, table)" class="btn  btn-default" title="Delete selected data">
                 {{dbManger.nbDataToDelete()}} <i class="fa fa-trash-o" fa-stack-1x aria-hidden="true"></i>
               </div>
-              <div ng-click="dbManger.addNewData($event, table)" class="btn  btn-default" title="Add nes data">
+
+              <label ng-show="dbManger.fileDump" class="btn btn-primary"  ng-click="dbManger.loadDump()">
+                    Load DumpFile :   <strong>{{dbManger.fileDump.name}}</strong> ({{dbManger.dumpSizeInKo()}}ko)
+              </label>
+
+              <label ng-show="dbManger.fileDump" class="btn btn-danger"  ng-click="dbManger.cancelDump()">
+                    Cancel
+              </label>
+              <label class="btn btn-default btn-file">
+                <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+                Browse for dump<input type="file" style="display: none;"  fileread="dbManger.fileDump" ng-model="dbManger.fileDump">
+              </label>
+              <div ng-click="dbManger.addNewData($event, table)" class="btn  btn-default" title="Add new data">
                 <i class="fa fa-plus-circle" aria-hidden="true"></i>
               </div>
             </div>

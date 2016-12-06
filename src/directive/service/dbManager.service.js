@@ -7,7 +7,7 @@ export class DbManagerService {
     'ngInject';
     this.config(ngDexieAdminConfig)
     this.previsouSearch = "";
-    this.countTupleForEachTable();
+    this.onRefresh = ()=>{};
   }
 
   config(config) {
@@ -127,7 +127,7 @@ export class DbManagerService {
     return config;
   }
 
-  onRefresh(call) {
+  configOnRefresh(call) {
     this.onRefresh = call;
   }
 
